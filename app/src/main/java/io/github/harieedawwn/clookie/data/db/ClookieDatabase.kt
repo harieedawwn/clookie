@@ -106,6 +106,9 @@ interface AlarmDao {
 
     @Insert
     suspend fun log(entry: WakeLogEntity)
+
+    @Query("SELECT * FROM wake_log WHERE scheduledAt >= :since ORDER BY scheduledAt DESC")
+    fun observeLog(since: Long): Flow<List<WakeLogEntity>>
 }
 
 @Dao
@@ -133,6 +136,12 @@ interface CodeDao {
 
     @Query("DELETE FROM scan_codes WHERE id = :id")
     suspend fun deleteScanCode(id: Long)
+
+    @Query("DELETE FROM cookie_codes")
+    suspend fun deleteAllCookieCodes()
+
+    @Query("DELETE FROM scan_codes")
+    suspend fun deleteAllScanCodes()
 }
 
 @Database(

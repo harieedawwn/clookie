@@ -41,6 +41,7 @@ import io.github.harieedawwn.clookie.ui.components.Segmented
 import io.github.harieedawwn.clookie.ui.components.Txt
 import io.github.harieedawwn.clookie.ui.screenBackground
 import io.github.harieedawwn.clookie.model.Alarm
+import io.github.harieedawwn.clookie.model.Bedtime
 import io.github.harieedawwn.clookie.ui.UpdateUi
 import io.github.harieedawwn.clookie.ui.components.ClookieSheet
 import io.github.harieedawwn.clookie.ui.info
@@ -62,9 +63,22 @@ fun SettingsScreen(
     reliabilityIssue: Boolean = false,
     defaultSound: String = Alarm.DefaultSound,
     onDefaultSound: (String) -> Unit = {},
+    themeName: String? = null,
+    reducedMotion: Boolean = false,
+    onReducedMotion: (Boolean) -> Unit = {},
+    streak: Int = 0,
+    onWakeLog: () -> Unit = {},
+    bedtimeOn: Boolean = false,
+    sleepGoal: Int = Bedtime.DefaultGoal,
+    onBedtime: (Boolean) -> Unit = {},
+    onSleepGoal: (Int) -> Unit = {},
+    onBackup: () -> Unit = {},
+    onRestore: () -> Unit = {},
+    backupStatus: String? = null,
 ) {
     val c = Clookie.colors
     var soundSheet by remember { mutableStateOf(false) }
+    var bedtimeSheet by remember { mutableStateOf(false) }
     Box(modifier.fillMaxSize()) {
     Column(
         Modifier
@@ -81,8 +95,14 @@ fun SettingsScreen(
 
         Eyebrow(stringResource(R.string.appearance))
         Group {
-            SettingsRow(ClookieIcons.Cookie, stringResource(R.string.theme), stringResource(preset.nameRes), onTheme)
+            SettingsRow(ClookieIcons.Cookie, stringResource(R.string.studio), themeName ?: stringResource(preset.nameRes), onTheme)
         }
+        Segmented(
+            options = listOf(false to stringResource(R.string.motion_full), true to stringResource(R.string.motion_reduced)),
+            selected = reducedMotion,
+            onSelect = onReducedMotion,
+            modifier = Modifier.fillMaxWidth(),
+        )
         Eyebrow(stringResource(R.string.language))
         Segmented(
             options = listOf("vi" to "Tiếng Việt", "en" to "English"),
@@ -104,6 +124,26 @@ fun SettingsScreen(
             SettingsRow(ClookieIcons.Alarm, stringResource(R.string.time_format), stringResource(R.string.time_format_24), {})
             Divider()
             SettingsRow(ClookieIcons.Repeat, stringResource(R.string.week_starts), stringResource(R.string.monday), {})
+        }
+
+        Spacer(Modifier.height(Space.s2))
+        Eyebrow(stringResource(R.string.habits))
+        Group {
+            SettingsRow(ClookieIcons.Check, stringResource(R.string.wake_log), stringResource(R.string.streak_value, streak), onWakeLog)
+            Divider()
+            SettingsRow(
+                ClookieIcons.Moon, stringResource(R.string.bedtime),
+                if (bedtimeOn) stringResource(R.string.sleep_goal) + " · " + goalText(sleepGoal) else stringResource(R.string.off),
+                { bedtimeSheet = true },
+            )
+        }
+
+        Spacer(Modifier.height(Space.s2))
+        Eyebrow(stringResource(R.string.data))
+        Group {
+            SettingsRow(ClookieIcons.Download, stringResource(R.string.backup), backupStatus ?: stringResource(R.string.backup_value), onBackup)
+            Divider()
+            SettingsRow(ClookieIcons.Repeat, stringResource(R.string.restore), stringResource(R.string.backup_value), onRestore)
         }
 
         Spacer(Modifier.height(Space.s2))
@@ -139,6 +179,29 @@ fun SettingsScreen(
     ClookieSheet(soundSheet, onDismiss = { soundSheet = false }) {
         SoundSheet(defaultSound, onDefaultSound)
     }
+    ClookieSheet(bedtimeSheet, onDismiss = { bedtimeSheet = false }) {
+        BedtimeSheet(bedtimeOn, sleepGoal, onBedtime, onSleepGoal)
+    }
+    }
+}
+
+@Composable
+fun goalText(minutes: Int): String =
+    if (minutes % 60 == 0) stringResource(R.string.hours_value, minutes / 60) else stringResource(R.string.hours_half_value, minutes / 60)
+
+@Composable
+fun BedtimeSheet(on: Boolean, goal: Int, onToggle: (Boolean) -> Unit, onGoal: (Int) -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        Txt(stringResource(R.string.bedtime), Clookie.type.title, Modifier.fillMaxWidth())
+        Spacer(Modifier.height(Space.s4))
+        Eyebrow(stringResource(R.string.bedtime_reminder))
+        Spacer(Modifier.height(Space.s2))
+        Segmented(listOf(true to stringResource(R.string.on), false to stringResource(R.string.off)), on, onToggle, Modifier.fillMaxWidth())
+        Spacer(Modifier.height(Space.s4))
+        Eyebrow(stringResource(R.string.sleep_goal))
+        Spacer(Modifier.height(Space.s2))
+        ChoiceChips(Bedtime.GoalMinutes.map { it to goalText(it) }, goal, onGoal)
+        Spacer(Modifier.height(Space.s4))
     }
 }
 

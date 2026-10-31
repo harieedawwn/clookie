@@ -27,10 +27,10 @@ class MainActivity : AppCompatActivity() {
         val store = SettingsStore(applicationContext)
         val repo = AlarmRepository.get(applicationContext)
         // Tiny DataStore file: read once so the first frame has the right preset and screen.
-        val (preset, onboarded) = runBlocking { store.presetNow() to store.onboarded.first() }
+        val (preset, onboarded, reduced) = runBlocking { Triple(store.presetNow(), store.onboarded.first(), store.reducedMotionNow()) }
         // Opening the app re-registers every alarm (cheap; heals any lost AlarmManager entry).
         lifecycleScope.launch { AlarmEngine.reschedule(applicationContext) }
-        setContent { ClookieApp(store, repo, window, preset, onboarded) }
+        setContent { ClookieApp(store, repo, window, preset, onboarded, reduced) }
     }
 
     override fun onResume() {

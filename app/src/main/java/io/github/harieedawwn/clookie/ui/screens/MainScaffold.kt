@@ -16,6 +16,7 @@ import io.github.harieedawwn.clookie.R
 import io.github.harieedawwn.clookie.design.Clookie
 import io.github.harieedawwn.clookie.design.Space
 import io.github.harieedawwn.clookie.design.icons.ClookieIcon
+import io.github.harieedawwn.clookie.design.ClockStyle
 import io.github.harieedawwn.clookie.model.Alarm
 import io.github.harieedawwn.clookie.ui.components.ClookieBottomNav
 import io.github.harieedawwn.clookie.ui.components.NavDest
@@ -44,25 +45,9 @@ fun HomeChrome(
     onReliability: () -> Unit = {},
     onTab: (NavDest) -> Unit = {},
     banner: (@Composable () -> Unit)? = null,
+    clockStyle: ClockStyle = ClockStyle.Digital,
 ) {
     MainScaffold(NavDest.Alarms, onTab) {
-        HomeScreen(alarms, onToggle, onOpen, onAdd, onNap, onReliability, reliabilityIssue, banner = banner)
-    }
-}
-
-/** Timer and stopwatch tabs until Stage 5. */
-@Composable
-fun ComingSoonScreen(tab: NavDest, modifier: Modifier = Modifier) {
-    Column(
-        modifier.fillMaxSize().screenBackground().padding(Space.gutter),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        ClookieIcon(tab.icon, null, size = 72.dp, tint = Clookie.colors.ink)
-        Spacer(Modifier.height(Space.s4))
-        Txt(stringResource(tab.label), Clookie.type.displayTitle)
-        Spacer(Modifier.height(Space.s3))
-        PillChip(stringResource(R.string.coming_soon), selected = true, onClick = {})
-        Spacer(Modifier.height(96.dp))
+        HomeScreen(alarms, onToggle, onOpen, onAdd, onNap, onReliability, reliabilityIssue, banner = banner, clockStyle = clockStyle)
     }
 }

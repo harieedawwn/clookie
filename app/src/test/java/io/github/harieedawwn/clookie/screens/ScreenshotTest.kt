@@ -30,7 +30,9 @@ import io.github.harieedawwn.clookie.ui.screens.PermissionScreen
 import io.github.harieedawwn.clookie.ui.screens.ReliabilityScreen
 import io.github.harieedawwn.clookie.ui.screens.RingingScreen
 import io.github.harieedawwn.clookie.ui.screens.SettingsScreen
-import io.github.harieedawwn.clookie.ui.screens.ThemePickerScreen
+import io.github.harieedawwn.clookie.ui.screens.StudioScreen
+import io.github.harieedawwn.clookie.design.ClockStyle
+import io.github.harieedawwn.clookie.design.Look
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
@@ -87,7 +89,9 @@ class ScreenshotTest {
             shot("home_${p.id}", p) { Home() }
             shot("editor_${p.id}", p) { Editor() }
             shot("ringing_${p.id}", p) { RingingScreen(SampleAlarms.list[1], now.value.toLocalDate().plusDays(1), {}, {}) }
-            shot("themes_${p.id}", p) { ThemePickerScreen(p, SampleAlarms.list, {}, {}) }
+            shot("themes_${p.id}", p) {
+                StudioScreen(Look(p.id), ClockStyle.Digital, emptyList(), false, SampleAlarms.list, { _, _ -> }, { _, _ -> }, {}, {}, {})
+            }
             shot("settings_${p.id}", p) { Settings(p) }
         }
         shot("editor_keypad_bo_sua", Presets.BoSua) { Editor(EditorSheet.Keypad) }

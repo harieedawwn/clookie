@@ -21,9 +21,11 @@ object Notifications {
     const val CHANNEL_MISSED = "missed"
     const val CHANNEL_UPDATES = "updates"
     const val CHANNEL_AWAKE = "awake"
+    const val CHANNEL_BEDTIME = "bedtime"
     const val ID_RINGING = 1
     const val ID_RETURN = 2
     const val ID_AWAKE = 3
+    const val ID_BEDTIME = 4
     private const val ID_MISSED_BASE = 1000
 
     fun createChannels(context: Context) {
@@ -43,6 +45,7 @@ object Notifications {
                 NotificationChannel(CHANNEL_AWAKE, context.getString(R.string.channel_awake), NotificationManager.IMPORTANCE_HIGH).apply {
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                 },
+                NotificationChannel(CHANNEL_BEDTIME, context.getString(R.string.channel_bedtime), NotificationManager.IMPORTANCE_DEFAULT),
             ),
         )
     }

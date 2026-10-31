@@ -137,13 +137,16 @@ class RingingService : Service() {
     }
 
     private suspend fun transition(event: RingEvent) {
-        val t = store.read().on(event)
+        val before = store.read()
+        val t = before.on(event)
         store.write(t.state)
         RingEngine.publish(t.state)
-        for (effect in t.effects) apply(effect)
+        // The wake log's "time to dismiss" counts from when this ring started.
+        val startedAt = (before as? RingState.Ringing)?.startedAt
+        for (effect in t.effects) apply(effect, startedAt)
     }
 
-    private suspend fun apply(effect: RingEffect) {
+    private suspend fun apply(effect: RingEffect, ringStartedAt: Long?) {
         when (effect) {
             is RingEffect.StartRinging -> {
                 if (ringing?.id == effect.alarmId && player != null) return // already ringing (restore while alive)
@@ -163,7 +166,7 @@ class RingingService : Service() {
             is RingEffect.Finish -> {
                 val alarm = repo.get(effect.alarmId)
                 val now = System.currentTimeMillis()
-                repo.finish(effect.alarmId, effect.outcome, effect.triggerAt, now)
+                repo.finish(effect.alarmId, effect.outcome, effect.triggerAt, ringStartedAt ?: now)
                 if (effect.outcome == RingOutcome.Missed && alarm != null) Notifications.missed(this, alarm, effect.triggerAt)
                 if (effect.outcome == RingOutcome.Dismissed && alarm != null) {
                     AwakeCheck.send(this, AwakeEvent.Dismissed(alarm.id, alarm.awakeCheck, alarm.awakeCheckMinutes, now))

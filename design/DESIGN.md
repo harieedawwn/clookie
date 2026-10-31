@@ -49,6 +49,11 @@ list rows with trailing switch), emoji or Material icons on main screens, explan
 - `PermissionRow` (status badge, "Bỏ qua", "Cấp") in a `RowGroup`; `ChoiceChips` for every editor-sheet choice;
   `UpdateBanner` inline on Home. Editor settings open as `ClookieSheet`s (never dialogs or stock pickers).
 
+- Stage 5: `Look` (studio overrides, `ClookieTheme(look = …)`, `Clookie.style.clockFont/density`), `StudioScreen`
+  (live preview + controls), `CookieClock`, `WordClockText`, `NowNumerals` (clock faces read `LocalNow` in draw or
+  once a minute), `TimerScreen`/`StopwatchScreen` (rings and hundredths drawn from the frame clock, skipped when
+  reduced), `WakeLogScreen` (flat bars, accent = on time), widget layout `res/layout/widget_clock.xml`.
+
 ## Missions (plug-in contract, `mission/`)
 - A mission = one `object : WakeMission` + one line in `MissionRegistry.all`. Nothing else changes: the engine,
   the ringing host (`RingingScreen`) and the editor's mission sheet read the registry.

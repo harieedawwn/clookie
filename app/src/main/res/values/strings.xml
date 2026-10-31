@@ -262,4 +262,74 @@
         <item>Đồng hồ đã kêu rồi, đứng dậy đi đánh răng thôi</item>
         <item>Phở bò tái nạm và một ly trà đá thật mát</item>
     </string-array>
+    <!-- Stage 5: studio, clocks, timer, stopwatch, wake log, bedtime, widget, backup -->
+    <string name="widget_name">Đồng hồ Clookie</string>
+    <string name="channel_bedtime">Giờ đi ngủ</string>
+    <string name="bedtime_title">Đến giờ đi ngủ</string>
+    <string name="bedtime_text">Báo thức %1$s · ngủ đủ %2$s</string>
+    <string name="hours_value">%1$d giờ</string>
+    <string name="hours_half_value">%1$d,5 giờ</string>
+    <string name="bedtime">Giờ đi ngủ</string>
+    <string name="sleep_goal">Mục tiêu ngủ</string>
+    <string name="bedtime_reminder">Nhắc đi ngủ</string>
+    <string name="studio">Tuỳ biến</string>
+    <string name="accent">Màu nhấn</string>
+    <string name="accent_auto">Màu của bộ</string>
+    <string name="clock_font">Kiểu số</string>
+    <string name="corners">Góc</string>
+    <string name="corner_soft">Mềm</string>
+    <string name="corner_rounded">Bo</string>
+    <string name="corner_crisp">Sắc</string>
+    <string name="hard_shadow">Bóng cứng</string>
+    <string name="density">Mật độ</string>
+    <string name="density_comfortable">Thoáng</string>
+    <string name="density_compact">Gọn</string>
+    <string name="motion">Chuyển động</string>
+    <string name="motion_full">Đầy đủ</string>
+    <string name="motion_reduced">Giảm chuyển động</string>
+    <string name="clock_style">Đồng hồ</string>
+    <string name="style_digital">Số lớn</string>
+    <string name="style_cookie">Bánh quy</string>
+    <string name="style_words">Bằng chữ</string>
+    <string name="style_minimal">Tối giản</string>
+    <string name="studio_apply">Dùng</string>
+    <string name="contrast_adjusted">Đã chỉnh cho dễ đọc</string>
+    <string name="save_preset">Lưu</string>
+    <string name="my_preset">Của tôi %1$d</string>
+    <string name="now">Bây giờ</string>
+    <string name="timer_start">Bắt đầu</string>
+    <string name="timer_pause">Dừng</string>
+    <string name="timer_resume">Tiếp tục</string>
+    <string name="timer_reset">Đặt lại</string>
+    <string name="timer_done">Hết giờ</string>
+    <string name="timer_paused">Đang dừng</string>
+    <string name="timer_ends">Xong lúc %1$s</string>
+    <string name="timer_presets">Chọn nhanh</string>
+    <string name="minutes_short">%1$d phút</string>
+    <string name="sw_lap">Vòng</string>
+    <string name="sw_lap_n">Vòng %1$d</string>
+    <string name="wake_log">Nhật ký thức dậy</string>
+    <string name="streak">Chuỗi đúng giờ</string>
+    <string name="streak_value">Chuỗi %1$d ngày</string>
+    <string name="days_unit">ngày</string>
+    <string name="last_14">14 ngày qua</string>
+    <string name="recent_wakes">Gần đây</string>
+    <string name="time_to_dismiss">Tắt sau %1$s</string>
+    <string name="snoozes_n">Báo lại ×%1$d</string>
+    <string name="on_time">Đúng giờ</string>
+    <string name="wake_late">Trễ</string>
+    <string name="wake_missed">Lỡ</string>
+    <string name="no_wakes">Chưa có dữ liệu</string>
+    <string name="duration_ms">%1$d phút %2$d giây</string>
+    <string name="duration_s">%1$d giây</string>
+    <string name="habits">Thói quen</string>
+    <string name="data">Dữ liệu</string>
+    <string name="backup">Sao lưu</string>
+    <string name="restore">Khôi phục</string>
+    <string name="backup_value">Tệp JSON</string>
+    <string name="backup_done">Đã lưu %1$d báo thức</string>
+    <string name="restore_done">Đã khôi phục %1$d báo thức</string>
+    <string name="backup_failed">Tệp không hợp lệ</string>
+    <string name="font_display" translatable="false">Fraunces</string>
+    <string name="font_ui" translatable="false">Be Vietnam</string>
 </resources>

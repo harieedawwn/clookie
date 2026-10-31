@@ -38,14 +38,31 @@ import io.github.harieedawwn.clookie.model.Alarm
 import io.github.harieedawwn.clookie.reliability.criticalIssue
 import io.github.harieedawwn.clookie.ui.components.NavDest
 import io.github.harieedawwn.clookie.ui.screens.AlarmEditorScreen
-import io.github.harieedawwn.clookie.ui.screens.ComingSoonScreen
 import io.github.harieedawwn.clookie.ui.screens.HomeScreen
 import io.github.harieedawwn.clookie.ui.screens.MainScaffold
 import io.github.harieedawwn.clookie.ui.screens.PermissionScreen
 import io.github.harieedawwn.clookie.ui.screens.ReliabilityScreen
 import io.github.harieedawwn.clookie.ui.screens.RingingScreen
 import io.github.harieedawwn.clookie.ui.screens.SettingsScreen
-import io.github.harieedawwn.clookie.ui.screens.ThemePickerScreen
+import io.github.harieedawwn.clookie.ui.screens.StopwatchScreen
+import io.github.harieedawwn.clookie.ui.screens.StudioScreen
+import io.github.harieedawwn.clookie.ui.screens.TimerScreen
+import io.github.harieedawwn.clookie.ui.screens.WakeLogScreen
+import io.github.harieedawwn.clookie.alarm.AlarmSideEffects
+import io.github.harieedawwn.clookie.data.Backups
+import io.github.harieedawwn.clookie.design.ClockStyle
+import io.github.harieedawwn.clookie.design.CustomPreset
+import io.github.harieedawwn.clookie.design.Look
+import io.github.harieedawwn.clookie.model.AlarmKind
+import io.github.harieedawwn.clookie.model.Bedtime
+import io.github.harieedawwn.clookie.model.Stopwatch
+import io.github.harieedawwn.clookie.model.TimerState
+import io.github.harieedawwn.clookie.model.WakeStats
+import android.os.SystemClock
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.coroutines.flow.first
+import java.time.ZoneId
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -56,17 +73,75 @@ sealed interface Route {
     data object Themes : Route
     data class Permissions(val firstLaunch: Boolean) : Route
     data object Reliability : Route
+    data object WakeLog : Route
 }
 
 /** App shell: Room-backed alarms, first-launch permission screen, Độ tin cậy, updater. */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ClookieApp(store: SettingsStore, repo: AlarmRepository, window: Window?, initialPreset: String?, onboarded: Boolean) {
-    val presetId by store.presetId.collectAsState(initial = initialPreset)
-    val preset = Presets.byId(presetId)
+fun ClookieApp(
+    store: SettingsStore,
+    repo: AlarmRepository,
+    window: Window?,
+    initialPreset: String?,
+    onboarded: Boolean,
+    initialReducedMotion: Boolean = false,
+) {
+    val look by store.look.collectAsState(initial = Look(Presets.byId(initialPreset).id))
+    val preset = Presets.byId(look.base)
+    val customPresets by store.customPresets.collectAsState(initial = emptyList())
+    val clockStyle by store.clockStyle.collectAsState(initial = ClockStyle.Digital)
+    val reducedMotion by store.reducedMotion.collectAsState(initial = initialReducedMotion)
+    val sleepGoal by store.sleepGoal.collectAsState(initial = Bedtime.DefaultGoal)
+    val bedtimeOn by store.bedtimeOn.collectAsState(initial = false)
+    val timer by store.timer.collectAsState(initial = TimerState())
+    val stopwatch by store.stopwatch.collectAsState(initial = Stopwatch())
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val alarms by repo.alarms.collectAsState(initial = emptyList())
+    val allAlarms by repo.alarms.collectAsState(initial = emptyList())
+    // Timers ring through the engine but are not alarms on Home.
+    val alarms = remember(allAlarms) { allAlarms.filter { it.kind != AlarmKind.Timer } }
+    val wakeLog by remember { repo.wakeLog(System.currentTimeMillis() - 60L * 86_400_000L) }.collectAsState(initial = emptyList())
+    val streak = remember(wakeLog) { WakeStats.streak(wakeLog, ZoneId.systemDefault()) }
+    // Widget colors and the bedtime reminder follow the look and the sleep settings.
+    LaunchedEffect(look, bedtimeOn, sleepGoal) { AlarmSideEffects.refresh(context.applicationContext) }
+    var backupStatus by remember { mutableStateOf<String?>(null) }
+    val backupSaved = stringResource(R.string.backup_done)
+    val restoreDone = stringResource(R.string.restore_done)
+    val backupFailed = stringResource(R.string.backup_failed)
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) scope.launch {
+            backupStatus = runCatching { Backups.export(context, uri, currentLanguage()) }
+                .fold({ backupSaved.format(it) }, { backupFailed })
+        }
+    }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) scope.launch {
+            backupStatus = runCatching { Backups.import(context, uri) }.fold({ data ->
+                if (data.language != currentLanguage()) AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(data.language))
+                restoreDone.format(data.alarms.size)
+            }, { backupFailed })
+        }
+    }
+    val timerLabel = stringResource(R.string.nav_timer)
+    fun timerStart() = scope.launch {
+        if (timer.running) return@launch
+        val now = System.currentTimeMillis()
+        val endAt = now + timer.left(now)
+        val id = repo.addTimer(endAt, timerLabel, Alarm(0, 0, 0, sound = store.defaultSound.first()))
+        store.setTimer(timer.copy(endAt = endAt, remaining = null, alarmId = id))
+    }
+    fun timerPause() = scope.launch {
+        timer.alarmId?.let { repo.delete(it) }
+        store.setTimer(timer.copy(endAt = null, remaining = timer.left(System.currentTimeMillis()), alarmId = null))
+    }
+    fun timerReset(duration: Long = timer.duration) = scope.launch {
+        timer.alarmId?.let { repo.delete(it) }
+        store.setTimer(TimerState(duration))
+    }
+    fun stopwatch(change: (Stopwatch, Long) -> Stopwatch) = scope.launch {
+        store.setStopwatch(change(stopwatch, SystemClock.elapsedRealtime()))
+    }
     val defaultSound by store.defaultSound.collectAsState(initial = Alarm.DefaultSound)
     val rows by rememberPermissionRows(store)
     val permissions = rememberPermissionActions(store)
@@ -83,7 +158,7 @@ fun ClookieApp(store: SettingsStore, repo: AlarmRepository, window: Window?, ini
     val issue = rows.criticalIssue()
     val napLabel = stringResource(R.string.nap_label)
 
-    ClookieTheme(preset) {
+    ClookieTheme(preset, reducedMotion = reducedMotion, look = look) {
         val c = Clookie.colors
         val motion = Clookie.motion
         val view = LocalView.current
@@ -118,8 +193,22 @@ fun ClookieApp(store: SettingsStore, repo: AlarmRepository, window: Window?, ini
                                         banner = if (updates.state.info() != null) {
                                             { UpdateBanner(updates.state, updates::act) }
                                         } else null,
+                                        clockStyle = clockStyle,
                                     )
-                                    NavDest.Timer, NavDest.Stopwatch -> ComingSoonScreen(tab)
+                                    NavDest.Timer -> TimerScreen(
+                                        timer,
+                                        onPick = { ms -> if (!timer.running || timer.left(System.currentTimeMillis()) == 0L) timerReset(ms) },
+                                        onStart = { timerStart() },
+                                        onPause = { timerPause() },
+                                        onReset = { timerReset() },
+                                    )
+                                    NavDest.Stopwatch -> StopwatchScreen(
+                                        remember(stopwatch) { stopwatch.afterReboot(SystemClock.elapsedRealtime()) },
+                                        onStart = { stopwatch { s, now -> s.afterReboot(now).start(now) } },
+                                        onPause = { stopwatch { s, now -> s.afterReboot(now).pause(now) } },
+                                        onLap = { stopwatch { s, now -> s.afterReboot(now).lap(now) } },
+                                        onReset = { stopwatch { s, _ -> s.reset() } },
+                                    )
                                     NavDest.Settings -> SettingsScreen(
                                         preset = preset,
                                         language = currentLanguage(),
@@ -132,6 +221,19 @@ fun ClookieApp(store: SettingsStore, repo: AlarmRepository, window: Window?, ini
                                         reliabilityIssue = issue,
                                         defaultSound = defaultSound,
                                         onDefaultSound = { scope.launch { store.setDefaultSound(it) } },
+                                        themeName = customPresets.firstOrNull { it.look == look }?.name
+                                            ?: if (look.isPlain) null else stringResource(preset.nameRes) + " · " + stringResource(R.string.custom),
+                                        reducedMotion = reducedMotion,
+                                        onReducedMotion = { scope.launch { store.setReducedMotion(it) } },
+                                        streak = streak,
+                                        onWakeLog = { go(Route.WakeLog) },
+                                        bedtimeOn = bedtimeOn,
+                                        sleepGoal = sleepGoal,
+                                        onBedtime = { scope.launch { store.setBedtime(it) } },
+                                        onSleepGoal = { scope.launch { store.setSleepGoal(it) } },
+                                        onBackup = { exportLauncher.launch("clookie-" + LocalDate.now() + ".json") },
+                                        onRestore = { importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) },
+                                        backupStatus = backupStatus,
                                     )
                                 }
                             }
@@ -159,12 +261,31 @@ fun ClookieApp(store: SettingsStore, repo: AlarmRepository, window: Window?, ini
                                 onDismissed = ::pop,
                                 onSnooze = ::pop,
                             )
-                            Route.Themes -> ThemePickerScreen(
-                                current = preset,
+                            Route.Themes -> StudioScreen(
+                                current = look,
+                                currentStyle = clockStyle,
+                                customPresets = customPresets,
+                                reducedMotion = reducedMotion,
                                 alarms = alarms,
-                                onApply = { scope.launch { store.setPreset(it.id) } },
+                                onApply = { l, st ->
+                                    scope.launch {
+                                        store.setLook(l)
+                                        store.setClockStyle(st)
+                                    }
+                                },
+                                onSave = { l, st ->
+                                    scope.launch {
+                                        val name = context.getString(R.string.my_preset, customPresets.size + 1)
+                                        store.setCustomPresets(listOf(CustomPreset("c" + System.currentTimeMillis(), name, l)) + customPresets)
+                                        store.setLook(l)
+                                        store.setClockStyle(st)
+                                    }
+                                },
+                                onDeleteCustom = { id -> scope.launch { store.setCustomPresets(customPresets.filter { it.id != id }) } },
+                                onReducedMotion = { scope.launch { store.setReducedMotion(it) } },
                                 onBack = ::pop,
                             )
+                            Route.WakeLog -> WakeLogScreen(wakeLog, LocalDate.now(), onBack = ::pop)
                             is Route.Permissions -> PermissionScreen(
                                 rows = rows,
                                 onGrant = permissions.grant,

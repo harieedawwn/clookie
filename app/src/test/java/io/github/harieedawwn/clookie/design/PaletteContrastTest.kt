@@ -37,6 +37,27 @@ class PaletteContrastTest {
         assertTrue(failures.joinToString("\n"), failures.isEmpty())
     }
 
+    /** Studio rule: any accent (swatches and a hue sweep) is auto-adjusted until the preset rules hold. */
+    @Test
+    fun customAccentsAreAdjustedToPass() {
+        val failures = mutableListOf<String>()
+        val sweep = (0 until 36).flatMap { h -> listOf(0.35f, 0.6f, 0.85f).map { v -> Color.hsv(h * 10f, 0.7f, v) } }
+        var adjusted = 0
+        for (p in Presets.all) for (accent in AccentSwatches + sweep + listOf(Color.White, Color.Black)) {
+            val c = p.with(Look(p.id, accent = accent)).colors
+            if (c.accent != accent) adjusted++
+            check(failures, p, "custom accent on background", c.accent, c.background, LargeContrast)
+            check(failures, p, "custom accent on surface", c.accent, c.surface, LargeContrast)
+            check(failures, p, "onAccent on custom accent", c.onAccent, c.accent, BodyContrast)
+            check(failures, p, "onRinging on ringing", c.onRinging, c.ringing, BodyContrast)
+        }
+        assertTrue(failures.take(20).joinToString("\n"), failures.isEmpty())
+        // The rule is not vacuous: many picks actually need adjusting.
+        assertTrue(adjusted > 50)
+        // A passing pick is kept as is.
+        assertTrue(adjustAccent(Presets.BoSua.colors.accent, Presets.BoSua.colors) == Presets.BoSua.colors.accent)
+    }
+
     @Test
     fun ensureContrastRepairsWeakPairs() {
         val bg = Color(0xFFEDE7F6)

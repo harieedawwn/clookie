@@ -147,6 +147,26 @@ targetSdk stays 36 until Stage 2 reviews Android 17 behavior changes for alarms 
   (90 s); unanswered = `RingingService.recheck` rings the same alarm; snooze or a new ring cancels; re-registered on
   boot; over 30 min overdue (phone off) it is dropped.
 
+### Customization and extras (Stage 5)
+- **Look** (`design/Look`): a built-in preset plus overrides (accent, clock font Fraunces / Be Vietnam Pro, corners,
+  hard shadow, density). A custom accent is pushed away from the background's lightness until accent >= 3:1 on
+  background and surface and its text >= 4.5:1 (`adjustAccent`); the studio shows picked -> adjusted. Saved presets
+  and the look live in DataStore as short text codes. Motion (full / reduced) is one global setting, also in the studio.
+- **Clock styles**: Số lớn keeps the next-alarm hero; Bánh quy (cookie face, chips as hour marks, hands drawn in the
+  draw phase), Bằng chữ (`model/WordClock`, 24-hour words, "phút" after single-digit minutes, :45-:59 "kém" against the
+  next hour) and Tối giản show the current time with the next alarm below.
+- **Timer**: one `AlarmKind.Timer` row with `oneShotAt` = end, so it rings through the engine (slide to stop, no
+  snooze) even when the app is killed; pause deletes the row, resume adds a new one; timers are hidden from Home and
+  not logged. **Stopwatch**: `elapsedRealtime` start + accumulated + lap totals in DataStore (survives backgrounding and
+  process death; after a reboot the running part restarts from the stored total).
+- **Wake log**: regular alarms only; time to dismiss counts from the ring's start. On time = stopped without snooze
+  within 5 min; streak = consecutive days with alarms whose first ring was on time (days without alarms are skipped).
+- **Bedtime**: one exact reminder at next alarm minus sleep goal (6-9 h), re-planned on every alarm or setting change.
+- **Widget**: RemoteViews with TextClock (time, date ticked by the launcher, `updatePeriodMillis` 0), next alarm,
+  preset colors, corner style and hard shadow; repainted only when alarms or the look change.
+- **Backup**: JSON, `schema` 1 (`BackupCodec`): regular alarms, Cookie/QR codes (ids kept for missions), look, saved
+  presets, clock style, motion, bedtime, default sound, language. Newer schemas are refused; restore replaces all.
+
 ## 4. OS limits to respect (verify on device in Stage 4)
 - No app can block Home, Recents or power-off. "Bring back the ringing screen" = foreground service keeps ringing + re-posted full-screen intent; with the optional overlay permission the service relaunches the activity from the background. Without it, Android 10+ background-activity-launch rules only allow the notification.
 - Android 14+: USE_FULL_SCREEN_INTENT can be revoked by the user; check `canUseFullScreenIntent()` and fix from Độ tin cậy.
@@ -174,7 +194,8 @@ targetSdk stays 36 until Stage 2 reviews Android 17 behavior changes for alarms 
 - [x] Sleeper profiles as one-tap presets; volume lock; return-to-ringing; awake check (4 min, 90 s); release v0.4.0.
 - [ ] OS limits in §4 confirmed on device (owner's Stage 4 device test).
 ### Stage 5 — customization and extras
-- [ ] Studio with token tweaks, live preview, saved presets; 4 home clock styles incl. Vietnamese word clock.
-- [ ] Timer + stopwatch, wake log with 14-day chart, bedtime reminder, widget in preset colors, JSON backup/restore, reduced-motion setting.
+- [x] Studio with token tweaks, live preview, saved presets; 4 home clock styles incl. Vietnamese word clock.
+- [x] Timer + stopwatch, wake log with 14-day chart, bedtime reminder, widget in preset colors, JSON backup/restore, reduced-motion setting; release v0.5.0.
+- [ ] Widget, timer in the background and bedtime reminder confirmed on device (owner's Stage 5 device test).
 ### Stage 6 — review and v1.0.0
 - [ ] Full review against this spec and the forbidden list; fixes; performance pass (no dropped frames on a weak phone, recomposition counts); v1.0.0 release.

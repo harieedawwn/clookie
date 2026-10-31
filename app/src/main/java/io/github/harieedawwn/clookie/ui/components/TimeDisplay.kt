@@ -23,7 +23,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import io.github.harieedawwn.clookie.design.Clookie
+import io.github.harieedawwn.clookie.design.ClockFont
 import io.github.harieedawwn.clookie.design.DisplayFamily
+import io.github.harieedawwn.clookie.design.UiFamily
+import androidx.compose.ui.text.font.FontWeight
 
 /** Plain text in Clookie styles (no Material Text, no LocalContentColor). */
 @Composable
@@ -65,7 +68,8 @@ fun TimeDisplay(
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer(cacheSize = 16)
     BoxWithConstraints(modifier.semantics(mergeDescendants = true) { contentDescription = "%02d:%02d".format(hour, minute) }) {
-        val base = remember(size, density) { styleFor(with(density) { size.toSp() }) }
+        val font = Clookie.style.clockFont
+        val base = remember(size, density, font) { styleFor(with(density) { size.toSp() }, font) }
         val (slotPx, colonPx) = remember(base) {
             val digit = ('0'..'9').maxOf { measurer.measure(it.toString(), base).size.width }
             digit * 1.02f to measurer.measure(":", base).size.width * 0.9f
@@ -73,7 +77,7 @@ fun TimeDisplay(
         val totalPx = slotPx * 4 + colonPx
         val maxPx = with(density) { maxWidth.toPx() }
         val scale = if (constraints.hasBoundedWidth && totalPx > maxPx) maxPx / totalPx else 1f
-        val style = if (scale < 1f) styleFor(with(density) { (size * scale).toSp() }) else base
+        val style = if (scale < 1f) styleFor(with(density) { (size * scale).toSp() }, font) else base
         val slot = with(density) { (slotPx * scale).toDp() }
         val colon = with(density) { (colonPx * scale).toDp() }
 
@@ -99,8 +103,10 @@ private fun DigitGroup(value: Int, slot: Dp, style: TextStyle, color: Color, onC
     }
 }
 
-private fun styleFor(fontSize: TextUnit) = TextStyle(
-    fontFamily = DisplayFamily,
+/** Numeral style in the studio's clock font: Fraunces display or Be Vietnam Pro bold. */
+fun styleFor(fontSize: TextUnit, font: ClockFont = ClockFont.Display) = TextStyle(
+    fontFamily = if (font == ClockFont.Ui) UiFamily else DisplayFamily,
+    fontWeight = if (font == ClockFont.Ui) FontWeight.Bold else FontWeight.ExtraBold,
     fontSize = fontSize,
     lineHeight = 1.02.em,
     letterSpacing = 0.em,

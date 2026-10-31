@@ -45,9 +45,11 @@ fun resolvePreset(preset: Preset): Preset {
 fun ClookieTheme(
     preset: Preset = Presets.BoSua,
     reducedMotion: Boolean = false,
+    look: Look? = null,
     content: @Composable () -> Unit,
 ) {
-    val resolved = resolvePreset(preset)
+    val base = resolvePreset(preset)
+    val resolved = if (look == null || look.isPlain) base else remember(base, look) { base.with(look) }
     val colors = resolved.colors
     val context = LocalContext.current
     val systemNoAnim = remember(context) {
@@ -73,7 +75,11 @@ fun ClookieTheme(
         CompositionLocalProvider(
             LocalClookieColors provides colors,
             LocalClookieShapes provides ClookieShapes.of(resolved.corners),
-            LocalClookieStyle provides ClookieStyle(hardShadow = resolved.hardShadow),
+            LocalClookieStyle provides ClookieStyle(
+                hardShadow = resolved.hardShadow,
+                density = look?.density ?: UiDensity.Comfortable,
+                clockFont = look?.clockFont ?: ClockFont.Display,
+            ),
             LocalClookieMotion provides motion,
             LocalIndication provides FlatIndication,
             LocalTextSelectionColors provides TextSelectionColors(colors.accent, colors.accentSoft),

@@ -88,4 +88,5 @@ data class ClookieStyle(
     val hardShadow: Boolean,
     val shadowOffset: Dp = 4.dp,
     val density: UiDensity = UiDensity.Comfortable,
+    val clockFont: ClockFont = ClockFont.Display,
 )

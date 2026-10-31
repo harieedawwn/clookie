@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.harieedawwn.clookie.R
+import io.github.harieedawwn.clookie.design.ClockStyle
 import io.github.harieedawwn.clookie.design.Clookie
 import io.github.harieedawwn.clookie.design.Space
 import io.github.harieedawwn.clookie.design.Stroke
@@ -47,6 +48,9 @@ import io.github.harieedawwn.clookie.ui.components.AlarmSlab
 import io.github.harieedawwn.clookie.ui.components.BiteAddButton
 import io.github.harieedawwn.clookie.ui.components.ClookieLockup
 import io.github.harieedawwn.clookie.ui.components.CookieButton
+import io.github.harieedawwn.clookie.ui.components.CookieClock
+import io.github.harieedawwn.clookie.ui.components.NowNumerals
+import io.github.harieedawwn.clookie.ui.components.WordClockText
 import io.github.harieedawwn.clookie.ui.components.IconCircleButton
 import io.github.harieedawwn.clookie.ui.components.PillChip
 import io.github.harieedawwn.clookie.ui.components.TimeDisplay
@@ -73,12 +77,14 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     bottomPadding: androidx.compose.ui.unit.Dp = 120.dp,
     banner: (@Composable () -> Unit)? = null,
+    clockStyle: ClockStyle = ClockStyle.Digital,
 ) {
     val top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val d = Clookie.style.density.scale
     LazyColumn(
         modifier.fillMaxSize().screenBackground(),
         contentPadding = PaddingValues(start = Space.gutter, end = Space.gutter, top = top + Space.s3, bottom = bottomPadding),
-        verticalArrangement = Arrangement.spacedBy(Space.s4),
+        verticalArrangement = Arrangement.spacedBy(Space.s4 * d),
     ) {
         item(key = "top") {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -97,7 +103,26 @@ fun HomeScreen(
             }
         }
         if (banner != null) item(key = "banner") { banner() }
-        item(key = "hero") { NextAlarmHero(alarms) }
+        item(key = "hero") {
+            when (clockStyle) {
+                ClockStyle.Digital -> NextAlarmHero(alarms, TimeSize.Hero.dp * d)
+                ClockStyle.Cookie -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CookieClock(Modifier.padding(top = Space.s4), size = 232.dp * d)
+                    NextAlarmHero(alarms, TimeSize.Compact.dp)
+                }
+                ClockStyle.Words -> Column(Modifier.padding(top = Space.s4)) {
+                    NowEyebrow()
+                    Spacer(Modifier.height(Space.s2))
+                    WordClockText()
+                    NextAlarmHero(alarms, TimeSize.Compact.dp)
+                }
+                ClockStyle.Minimal -> Column(Modifier.padding(top = Space.s8)) {
+                    NowEyebrow()
+                    NowNumerals(TimeSize.Hero.dp * 0.78f * d, Modifier.padding(vertical = Space.s1))
+                    MinimalNext(alarms)
+                }
+            }
+        }
         item(key = "naps") {
             Column {
                 Eyebrow(stringResource(R.string.quick_nap))
@@ -150,7 +175,35 @@ private fun EmptyAlarms(onAdd: () -> Unit) {
 }
 
 @Composable
-private fun NextAlarmHero(alarms: List<Alarm>) {
+private fun NowEyebrow() {
+    val now = LocalNow.current
+    val day by remember { derivedStateOf { now.value.toLocalDate() } }
+    val weekdays = stringArrayResource(R.array.weekday_full)
+    val months = stringArrayResource(R.array.month_names)
+    Eyebrow(stringResource(R.string.now) + " · " + weekdays[day.dayOfWeek.value - 1] + ", " + day.dayOfMonth + " " + months[day.monthValue - 1])
+}
+
+/** Minimal face: one quiet line for the next alarm. */
+@Composable
+private fun MinimalNext(alarms: List<Alarm>) {
+    val now = LocalNow.current
+    val list by rememberUpdatedState(alarms)
+    val next by remember { derivedStateOf { list.nextUp(now.value) } }
+    val up = next
+    if (up == null) {
+        Txt(stringResource(R.string.no_alarm_on), Clookie.type.bodyStrong, color = Clookie.colors.inkMuted)
+        return
+    }
+    val left by remember(up.second) { derivedStateOf { countdown(now.value, up.second) } }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        ClookieIcon(ClookieIcons.Bell, null, tint = Clookie.colors.accent, size = 18.dp)
+        Spacer(Modifier.width(Space.s2))
+        Txt("%02d:%02d · ".format(up.second.hour, up.second.minute) + countdownText(left), Clookie.type.bodyStrong, color = Clookie.colors.inkMuted, maxLines = 1)
+    }
+}
+
+@Composable
+private fun NextAlarmHero(alarms: List<Alarm>, numerals: androidx.compose.ui.unit.Dp) {
     val now = LocalNow.current
     val list by rememberUpdatedState(alarms)
     val next by remember { derivedStateOf { list.nextUp(now.value) } }
@@ -172,7 +225,7 @@ private fun NextAlarmHero(alarms: List<Alarm>) {
             else -> weekdays[at.dayOfWeek.value - 1]
         }
         Eyebrow(stringResource(R.string.next_alarm) + " · " + dayText)
-        TimeDisplay(at.hour, at.minute, TimeSize.Hero.dp, Modifier.fillMaxWidth().padding(vertical = Space.s1))
+        TimeDisplay(at.hour, at.minute, numerals, Modifier.fillMaxWidth().padding(vertical = Space.s1))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s3)) {
             val left by remember(at) { derivedStateOf { countdown(now.value, at) } }
             Row(
