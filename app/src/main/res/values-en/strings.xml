@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preset_bo_sua">Butter</string>
+    <string name="preset_socola">Chocolate</string>
+    <string name="preset_matcha">Matcha</string>
+    <string name="preset_khoai_mon">Taro</string>
+    <string name="preset_giay_o_li">Notebook</string>
+    <string name="preset_dem">Night</string>
+    <string name="preset_he_thong">System colors</string>
+
+    <string name="mission_classic">Slide</string>
+    <string name="mission_cookie_code">Cookie Code</string>
+    <string name="mission_qr">QR code</string>
+    <string name="mission_math">Math</string>
+    <string name="mission_shake">Shake</string>
+    <string name="mission_steps">Steps</string>
+    <string name="mission_typing">Typing</string>
+    <string name="mission_memory">Memory</string>
+    <string name="mission_crumbs">Crumbs</string>
+
+    <string name="profile_light">Light sleeper</string>
+    <string name="profile_medium">Medium sleeper</string>
+    <string name="profile_deep">Deep sleeper</string>
+
+    <string name="countdown_dh">in %1$d d %2$d h</string>
+    <string name="countdown_hm">in %1$d h %2$d min</string>
+    <string name="countdown_m">in %1$d min</string>
+    <string name="rings_in">Rings · %1$s</string>
+
+    <string name="nav_alarms">Alarms</string>
+    <string name="nav_timer">Timer</string>
+    <string name="nav_stopwatch">Stopwatch</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="reliability">Reliability</string>
+    <string name="quick_nap">Quick nap · min</string>
+    <string name="alarms">Alarms</string>
+    <string name="add_alarm">Add alarm</string>
+    <string name="next_alarm">Next alarm</string>
+    <string name="no_alarm_on">No alarm on</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="repeat_once">Once</string>
+
+    <string name="new_alarm">New alarm</string>
+    <string name="edit_alarm">Edit alarm</string>
+    <string name="repeat">Repeat</string>
+    <string name="missions">Missions</string>
+    <string name="sleeper_profile">Sleeper</string>
+    <string name="custom">Custom</string>
+    <string name="label">Label</string>
+    <string name="sound">Sound</string>
+    <string name="sound_crunch">Crunch</string>
+    <string name="volume">Volume</string>
+    <string name="volume_value">%1$d%%</string>
+    <string name="volume_value_ramp">%1$d%% · ramp %2$d s</string>
+    <string name="snooze">Snooze</string>
+    <string name="snooze_off">Off</string>
+    <string name="snooze_value">%1$d min × %2$d</string>
+    <string name="vibration">Vibration</string>
+    <string name="vibration_heartbeat">Heartbeat</string>
+    <string name="skip_next">Skip next</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+
+    <string name="slide_to_stop">Slide to stop</string>
+    <string name="snooze_action">Snooze · %1$d min</string>
+    <string name="date_format">%1$s, %4$s %2$d</string>
+
+    <string name="appearance">Appearance</string>
+    <string name="theme">Theme</string>
+    <string name="theme_apply">Use this theme</string>
+    <string name="theme_in_use">In use</string>
+    <string name="language">Language</string>
+    <string name="default_sound">Default sound</string>
+    <string name="time_format">Time format</string>
+    <string name="time_format_24">24-hour</string>
+    <string name="week_starts">Week starts</string>
+    <string name="monday">Monday</string>
+    <string name="updates">Updates</string>
+    <string name="version_value">Version %1$s</string>
+    <string name="coming_soon">Coming soon</string>
+
+    <string name="action_save">Save</string>
+    <string name="action_close">Close</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_back">Back</string>
+    <string name="action_try">Try</string>
+    <string name="action_done">Done</string>
+    <string name="action_check">Check</string>
+
+    <string name="cd_alarm_toggle">Alarm on</string>
+    <string name="cd_dial">Time dial</string>
+    <string name="cd_backspace">Delete digit</string>
+
+    <!-- Stage 2: engine, sheets, permissions, updater -->
+    <string name="sound_dawn">Sunrise</string>
+    <string name="sound_chime">Chimes</string>
+    <string name="sound_knock">Knock knock</string>
+    <string name="sound_chirp">Sparrow</string>
+    <string name="sound_beeper">Beeper</string>
+    <string name="sound_system">System tone</string>
+    <string name="sound_file">My file</string>
+    <string name="sound_pick_file">Pick a file</string>
+    <string name="sound_group_system">System</string>
+    <string name="channel_ringing">Ringing alarm</string>
+    <string name="channel_missed">Missed alarms</string>
+    <string name="channel_updates">Updates</string>
+    <string name="action_stop">Stop</string>
+    <string name="missed_title">Missed alarm %1$s</string>
+    <string name="setting_slides">Slides</string>
+    <string name="mission_step">Mission %1$d/%2$d</string>
+    <string name="mission_add">Add mission</string>
+    <string name="mission_remove">Remove mission</string>
+    <string name="vibration_steady">Steady</string>
+    <string name="vibration_crescendo">Crescendo</string>
+    <string name="volume_level">Level</string>
+    <string name="ramp">Ramp up</string>
+    <string name="ramp_off">None</string>
+    <string name="seconds_value">%1$d s</string>
+    <string name="snooze_length">Length</string>
+    <string name="snooze_count">Times</string>
+    <string name="minutes_value">%1$d min</string>
+    <string name="label_hint">Alarm name</string>
+    <string name="nap_label">Quick nap</string>
+    <string name="no_alarms">No alarms yet</string>
+    <string name="permissions_title">Permissions</string>
+    <string name="perm_required">Required</string>
+    <string name="perm_optional">Optional</string>
+    <string name="perm_grant_all">Grant all</string>
+    <string name="perm_grant">Grant</string>
+    <string name="perm_skip">Skip</string>
+    <string name="perm_granted">Granted</string>
+    <string name="perm_missing">Not granted</string>
+    <string name="perm_skipped">Skipped</string>
+    <string name="perm_opened">Opened</string>
+    <string name="perm_notifications">Notifications</string>
+    <string name="perm_exact">Exact alarms</string>
+    <string name="perm_fullscreen">Full screen</string>
+    <string name="perm_battery">Unrestricted battery</string>
+    <string name="perm_autostart">Autostart</string>
+    <string name="perm_camera">Camera</string>
+    <string name="perm_activity">Physical activity</string>
+    <string name="perm_install">Install updates</string>
+    <string name="perm_overlay">Display over apps</string>
+    <string name="reliability_ok">All good</string>
+    <string name="reliability_issues">To fix: %1$d</string>
+    <string name="all_permissions">All permissions</string>
+    <string name="update_available">Version %1$s</string>
+    <string name="update_download">Download</string>
+    <string name="update_install">Install</string>
+    <string name="update_latest">Up to date</string>
+    <string name="update_failed">Failed, retry</string>
+    <string name="update_checking">Checking</string>
+    <string name="update_downloading">Downloading %1$d%%</string>
+
+    <string-array name="weekday_short">
+        <item>Mo</item><item>Tu</item><item>We</item><item>Th</item><item>Fr</item><item>Sa</item><item>Su</item>
+    </string-array>
+    <string-array name="weekday_full">
+        <item>Monday</item><item>Tuesday</item><item>Wednesday</item><item>Thursday</item><item>Friday</item><item>Saturday</item><item>Sunday</item>
+    </string-array>
+    <string-array name="month_names">
+        <item>January</item><item>February</item><item>March</item><item>April</item><item>May</item><item>June</item>
+        <item>July</item><item>August</item><item>September</item><item>October</item><item>November</item><item>December</item>
+    </string-array>
+</resources>

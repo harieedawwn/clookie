@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vietnamese is the default language. Short labels only: no explanatory paragraphs. -->
+<resources>
+    <string name="app_name" translatable="false">Clookie</string>
+
+    <string name="preset_bo_sua">Bơ sữa</string>
+    <string name="preset_socola">Socola</string>
+    <string name="preset_matcha">Matcha</string>
+    <string name="preset_khoai_mon">Khoai môn</string>
+    <string name="preset_giay_o_li">Giấy ô li</string>
+    <string name="preset_dem">Đêm</string>
+    <string name="preset_he_thong">Màu hệ thống</string>
+
+    <string name="mission_classic">Trượt để tắt</string>
+    <string name="mission_cookie_code">Cookie Code</string>
+    <string name="mission_qr">Mã QR</string>
+    <string name="mission_math">Toán</string>
+    <string name="mission_shake">Lắc</string>
+    <string name="mission_steps">Đi bộ</string>
+    <string name="mission_typing">Gõ chữ</string>
+    <string name="mission_memory">Trí nhớ</string>
+    <string name="mission_crumbs">Vụn bánh</string>
+
+    <string name="profile_light">Ngủ nông</string>
+    <string name="profile_medium">Ngủ vừa</string>
+    <string name="profile_deep">Ngủ say</string>
+
+    <string name="countdown_dh">còn %1$d ngày %2$d giờ</string>
+    <string name="countdown_hm">còn %1$d giờ %2$d phút</string>
+    <string name="countdown_m">còn %1$d phút</string>
+    <string name="rings_in">Reo · %1$s</string>
+
+    <string name="nav_alarms">Báo thức</string>
+    <string name="nav_timer">Hẹn giờ</string>
+    <string name="nav_stopwatch">Bấm giờ</string>
+    <string name="nav_settings">Cài đặt</string>
+
+    <string name="reliability">Độ tin cậy</string>
+    <string name="quick_nap">Ngủ nhanh · phút</string>
+    <string name="alarms">Báo thức</string>
+    <string name="add_alarm">Thêm báo thức</string>
+    <string name="next_alarm">Báo thức tiếp theo</string>
+    <string name="no_alarm_on">Chưa bật báo thức</string>
+    <string name="today">Hôm nay</string>
+    <string name="tomorrow">Ngày mai</string>
+    <string name="repeat_once">Một lần</string>
+
+    <string name="new_alarm">Báo thức mới</string>
+    <string name="edit_alarm">Sửa báo thức</string>
+    <string name="repeat">Lặp lại</string>
+    <string name="missions">Nhiệm vụ</string>
+    <string name="sleeper_profile">Kiểu ngủ</string>
+    <string name="custom">Tuỳ chỉnh</string>
+    <string name="label">Nhãn</string>
+    <string name="sound">Âm thanh</string>
+    <string name="sound_crunch">Giòn tan</string>
+    <string name="volume">Âm lượng</string>
+    <string name="volume_value">%1$d%%</string>
+    <string name="volume_value_ramp">%1$d%% · tăng %2$d giây</string>
+    <string name="snooze">Báo lại</string>
+    <string name="snooze_off">Tắt</string>
+    <string name="snooze_value">%1$d phút × %2$d</string>
+    <string name="vibration">Rung</string>
+    <string name="vibration_heartbeat">Nhịp tim</string>
+    <string name="skip_next">Bỏ qua lần tới</string>
+    <string name="on">Bật</string>
+    <string name="off">Tắt</string>
+
+    <string name="slide_to_stop">Trượt để tắt</string>
+    <string name="snooze_action">Báo lại · %1$d phút</string>
+    <string name="date_format">%1$s, %2$d tháng %3$d</string>
+
+    <string name="appearance">Giao diện</string>
+    <string name="theme">Bộ màu</string>
+    <string name="theme_apply">Dùng bộ màu này</string>
+    <string name="theme_in_use">Đang dùng</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="default_sound">Âm thanh mặc định</string>
+    <string name="time_format">Định dạng giờ</string>
+    <string name="time_format_24">24 giờ</string>
+    <string name="week_starts">Tuần bắt đầu</string>
+    <string name="monday">Thứ Hai</string>
+    <string name="updates">Cập nhật</string>
+    <string name="version_value">Phiên bản %1$s</string>
+    <string name="coming_soon">Sắp có</string>
+
+    <string name="action_save">Lưu</string>
+    <string name="action_close">Đóng</string>
+    <string name="action_delete">Xoá</string>
+    <string name="action_back">Quay lại</string>
+    <string name="action_try">Thử</string>
+    <string name="action_done">Xong</string>
+    <string name="action_check">Kiểm tra</string>
+
+    <string name="cd_alarm_toggle">Bật báo thức</string>
+    <string name="cd_dial">Vòng chọn giờ</string>
+    <string name="cd_backspace">Xoá số</string>
+
+    <!-- Stage 2: engine, sheets, permissions, updater -->
+    <string name="sound_dawn">Bình minh</string>
+    <string name="sound_chime">Leng keng</string>
+    <string name="sound_knock">Gõ cửa</string>
+    <string name="sound_chirp">Chim sẻ</string>
+    <string name="sound_beeper">Bíp bíp</string>
+    <string name="sound_system">Âm hệ thống</string>
+    <string name="sound_file">Tệp của tôi</string>
+    <string name="sound_pick_file">Chọn tệp</string>
+    <string name="sound_group_system">Hệ thống</string>
+    <string name="channel_ringing">Báo thức đang reo</string>
+    <string name="channel_missed">Báo thức bị lỡ</string>
+    <string name="channel_updates">Cập nhật</string>
+    <string name="action_stop">Tắt</string>
+    <string name="missed_title">Lỡ báo thức %1$s</string>
+    <string name="setting_slides">Số lần trượt</string>
+    <string name="mission_step">Nhiệm vụ %1$d/%2$d</string>
+    <string name="mission_add">Thêm nhiệm vụ</string>
+    <string name="mission_remove">Bỏ nhiệm vụ</string>
+    <string name="vibration_steady">Đều</string>
+    <string name="vibration_crescendo">Tăng dần</string>
+    <string name="volume_level">Mức</string>
+    <string name="ramp">Tăng dần</string>
+    <string name="ramp_off">Không</string>
+    <string name="seconds_value">%1$d giây</string>
+    <string name="snooze_length">Thời lượng</string>
+    <string name="snooze_count">Số lần</string>
+    <string name="minutes_value">%1$d phút</string>
+    <string name="label_hint">Tên báo thức</string>
+    <string name="nap_label">Ngủ nhanh</string>
+    <string name="no_alarms">Chưa có báo thức</string>
+    <string name="permissions_title">Quyền</string>
+    <string name="perm_required">Bắt buộc</string>
+    <string name="perm_optional">Tuỳ chọn</string>
+    <string name="perm_grant_all">Cấp tất cả</string>
+    <string name="perm_grant">Cấp</string>
+    <string name="perm_skip">Bỏ qua</string>
+    <string name="perm_granted">Đã cấp</string>
+    <string name="perm_missing">Chưa cấp</string>
+    <string name="perm_skipped">Đã bỏ qua</string>
+    <string name="perm_opened">Đã mở</string>
+    <string name="perm_notifications">Thông báo</string>
+    <string name="perm_exact">Báo thức chính xác</string>
+    <string name="perm_fullscreen">Toàn màn hình</string>
+    <string name="perm_battery">Pin không giới hạn</string>
+    <string name="perm_autostart">Tự khởi động</string>
+    <string name="perm_camera">Camera</string>
+    <string name="perm_activity">Hoạt động thể chất</string>
+    <string name="perm_install">Cài bản cập nhật</string>
+    <string name="perm_overlay">Hiện trên ứng dụng khác</string>
+    <string name="reliability_ok">Mọi thứ ổn</string>
+    <string name="reliability_issues">%1$d mục cần sửa</string>
+    <string name="all_permissions">Tất cả quyền</string>
+    <string name="update_available">Có bản %1$s</string>
+    <string name="update_download">Tải về</string>
+    <string name="update_install">Cài đặt</string>
+    <string name="update_latest">Đã mới nhất</string>
+    <string name="update_failed">Lỗi, thử lại</string>
+    <string name="update_checking">Đang kiểm tra</string>
+    <string name="update_downloading">Đang tải %1$d%%</string>
+
+    <string-array name="weekday_short">
+        <item>T2</item><item>T3</item><item>T4</item><item>T5</item><item>T6</item><item>T7</item><item>CN</item>
+    </string-array>
+    <string-array name="weekday_full">
+        <item>Thứ Hai</item><item>Thứ Ba</item><item>Thứ Tư</item><item>Thứ Năm</item><item>Thứ Sáu</item><item>Thứ Bảy</item><item>Chủ Nhật</item>
+    </string-array>
+    <string-array name="month_names">
+        <item>tháng 1</item><item>tháng 2</item><item>tháng 3</item><item>tháng 4</item><item>tháng 5</item><item>tháng 6</item>
+        <item>tháng 7</item><item>tháng 8</item><item>tháng 9</item><item>tháng 10</item><item>tháng 11</item><item>tháng 12</item>
+    </string-array>
+</resources>
