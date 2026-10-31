@@ -202,4 +202,64 @@
         <item>tháng 1</item><item>tháng 2</item><item>tháng 3</item><item>tháng 4</item><item>tháng 5</item><item>tháng 6</item>
         <item>tháng 7</item><item>tháng 8</item><item>tháng 9</item><item>tháng 10</item><item>tháng 11</item><item>tháng 12</item>
     </string-array>
+    <!-- Stage 4: missions, profiles, safeguards -->
+    <string name="setting_level">Độ khó</string>
+    <string name="level_easy">Dễ</string>
+    <string name="level_medium">Vừa</string>
+    <string name="level_hard">Khó</string>
+    <string name="setting_problems">Số câu</string>
+    <string name="setting_shakes">Số lần lắc</string>
+    <string name="setting_sensitivity">Độ nhạy</string>
+    <string name="sensitivity_low">Thấp</string>
+    <string name="sensitivity_high">Cao</string>
+    <string name="setting_steps">Số bước</string>
+    <string name="setting_length">Độ dài</string>
+    <string name="length_short">Ngắn</string>
+    <string name="length_long">Dài</string>
+    <string name="setting_rounds">Số lượt</string>
+    <string name="setting_crumbs">Số vụn</string>
+    <string name="shake_hint">Lắc mạnh</string>
+    <string name="steps_hint">Đi bộ</string>
+    <string name="no_sensor">Không có cảm biến</string>
+    <string name="typing_hint">Gõ lại câu trên</string>
+    <string name="typing_off">Sai chữ</string>
+    <string name="typing_own">Câu của tôi</string>
+    <string name="typing_own_hint">Trống = câu có sẵn</string>
+    <string name="memory_watch">Nhìn kỹ</string>
+    <string name="memory_repeat">Lặp lại · %1$d/%2$d</string>
+    <string name="memory_wrong">Sai · xem lại</string>
+    <string name="round_progress">Lượt %1$d/%2$d</string>
+    <string name="crumbs_progress">Vụn bánh · %1$d/%2$d</string>
+    <string name="missions_done">Xong nhiệm vụ</string>
+    <string name="profile_light_value">Trượt · 60 giây · 9 phút × 5</string>
+    <string name="profile_medium_value">Toán hoặc vụn bánh · 20 giây · × 2</string>
+    <string name="profile_deep_value">Cookie Code + toán · khoá · kiểm tra thức</string>
+    <string name="safeguards">Chống ngủ quên</string>
+    <string name="volume_lock">Khoá âm lượng</string>
+    <string name="snooze_after_mission">Báo lại sau nhiệm vụ</string>
+    <string name="awake_check">Kiểm tra thức</string>
+    <string name="awake_check_after">Hỏi sau</string>
+    <string name="awake_title">Còn thức không?</string>
+    <string name="awake_yes">Còn thức</string>
+    <string name="channel_awake">Kiểm tra thức</string>
+    <string-array name="typing_short">
+        <item>Chào buổi sáng</item>
+        <item>Dậy thôi nào</item>
+        <item>Hôm nay trời đẹp</item>
+        <item>Uống một cốc nước</item>
+        <item>Mở cửa sổ ra</item>
+        <item>Đánh răng rửa mặt</item>
+        <item>Một ngày mới bắt đầu</item>
+        <item>Không ngủ nướng nữa</item>
+        <item>Bánh quy giòn tan</item>
+        <item>Cà phê sữa đá</item>
+    </string-array>
+    <string-array name="typing_long">
+        <item>Hôm nay mình sẽ dậy đúng giờ và không ngủ nướng</item>
+        <item>Mở cửa sổ, hít thở sâu và uống một cốc nước</item>
+        <item>Bữa sáng ngon nhất là bữa sáng không phải vội</item>
+        <item>Mỗi buổi sáng là một cơ hội để bắt đầu lại</item>
+        <item>Đồng hồ đã kêu rồi, đứng dậy đi đánh răng thôi</item>
+        <item>Phở bò tái nạm và một ly trà đá thật mát</item>
+    </string-array>
 </resources>

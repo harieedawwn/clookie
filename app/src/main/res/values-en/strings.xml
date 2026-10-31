@@ -194,4 +194,64 @@
         <item>January</item><item>February</item><item>March</item><item>April</item><item>May</item><item>June</item>
         <item>July</item><item>August</item><item>September</item><item>October</item><item>November</item><item>December</item>
     </string-array>
+    <!-- Stage 4: missions, profiles, safeguards -->
+    <string name="setting_level">Difficulty</string>
+    <string name="level_easy">Easy</string>
+    <string name="level_medium">Medium</string>
+    <string name="level_hard">Hard</string>
+    <string name="setting_problems">Count</string>
+    <string name="setting_shakes">Shakes</string>
+    <string name="setting_sensitivity">Sensitivity</string>
+    <string name="sensitivity_low">Low</string>
+    <string name="sensitivity_high">High</string>
+    <string name="setting_steps">Steps</string>
+    <string name="setting_length">Length</string>
+    <string name="length_short">Short</string>
+    <string name="length_long">Long</string>
+    <string name="setting_rounds">Rounds</string>
+    <string name="setting_crumbs">Crumbs</string>
+    <string name="shake_hint">Shake hard</string>
+    <string name="steps_hint">Walk</string>
+    <string name="no_sensor">No sensor</string>
+    <string name="typing_hint">Type the line above</string>
+    <string name="typing_off">Typo</string>
+    <string name="typing_own">My phrase</string>
+    <string name="typing_own_hint">Empty = built-in</string>
+    <string name="memory_watch">Watch</string>
+    <string name="memory_repeat">Repeat · %1$d/%2$d</string>
+    <string name="memory_wrong">Wrong · watch again</string>
+    <string name="round_progress">Round %1$d/%2$d</string>
+    <string name="crumbs_progress">Crumbs · %1$d/%2$d</string>
+    <string name="missions_done">Missions done</string>
+    <string name="profile_light_value">Slide · 60 s · 9 min × 5</string>
+    <string name="profile_medium_value">Math or Crumbs · 20 s · × 2</string>
+    <string name="profile_deep_value">Cookie Code + math · locked · awake check</string>
+    <string name="safeguards">Heavy sleeper</string>
+    <string name="volume_lock">Volume lock</string>
+    <string name="snooze_after_mission">Snooze after mission</string>
+    <string name="awake_check">Awake check</string>
+    <string name="awake_check_after">Ask after</string>
+    <string name="awake_title">Still awake?</string>
+    <string name="awake_yes">I am awake</string>
+    <string name="channel_awake">Awake check</string>
+    <string-array name="typing_short">
+        <item>Good morning</item>
+        <item>Time to get up</item>
+        <item>What a lovely day</item>
+        <item>Drink a glass of water</item>
+        <item>Open the window</item>
+        <item>Brush your teeth</item>
+        <item>A new day begins</item>
+        <item>No more snoozing</item>
+        <item>Crunchy cookies</item>
+        <item>Iced milk coffee</item>
+    </string-array>
+    <string-array name="typing_long">
+        <item>Today I will get up on time and skip the snooze</item>
+        <item>Open the window, breathe deeply and drink some water</item>
+        <item>The best breakfast is the one you do not rush</item>
+        <item>Every morning is a chance to start over</item>
+        <item>The alarm has rung, so go and brush your teeth</item>
+        <item>A warm bowl of pho and a glass of iced tea</item>
+    </string-array>
 </resources>

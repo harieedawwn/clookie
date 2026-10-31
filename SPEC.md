@@ -127,6 +127,26 @@ targetSdk stays 36 until Stage 2 reviews Android 17 behavior changes for alarms 
   90° so barcodes work in both phone orientations; a code must be read twice within 4 frames.
 - **Fallbacks**: "Mất mã?" = 15 level-3 problems; no camera permission, camera error or no saved code = 5 problems.
 
+### Missions and safeguards (Stage 4)
+- **Tunables**: every count, size, speed and threshold lives in `model/MissionTuning`. Games draw on a Canvas in the
+  draw phase from a frame-time clock (`withFrameMillis`); screenshots use `LocalMissionDemo` (fixed mid-game frame).
+- **Shake**: linear acceleration (gravity by 500 ms low-pass) peaks over 2.6 / 2.0 / 1.5 g (sensitivity low/mid/high),
+  re-armed below half; a lone peak never counts (bursts only, 600 ms). **Steps**: TYPE_STEP_DETECTOR with
+  ACTIVITY_RECOGNITION, else |a| peaks (+0.12 g after -0.05 g), 0.28-1.6 s apart, each within 35 % of the last,
+  counted after 5 in a row, reset above +1.3 g. JVM traces: bed handling (flip, drop, bumps) = 0 shakes, 0 steps.
+- **Typing**: NFC + trim, exact (case-sensitive); "Sai chữ" only when base letters diverge, so Telex/VNI words in
+  progress are not flagged. Own phrase is stored URL-encoded in the mission codec (`Typing{...}~text`), no migration.
+- **Unfair-input guards**: Memory shows a new sequence after a wrong tap; Crumbs: a vanished crumb or a tap on empty
+  plate costs 1; Math keeps the problem, clears the answer. No sensor = 5 level-3 problems.
+- **Chain**: pure `ChainProgress` (step, solved, choosing). Snooze after mission: snooze only once a mission is solved;
+  a solved chain then offers slide-to-stop or snooze. Progress is kept per ring (alarm id + trigger) in the process.
+- **Volume lock**: the service restores STREAM_ALARM every 100 ms if lowered; the ringing screen eats volume-down/mute.
+- **Return to ringing**: the screen reports visibility; every 2 s while hidden the service relaunches it (overlay
+  permission + screen on) or re-posts a non-silent full-screen alert every 10 s (ID 2).
+- **Awake check**: pure `AwakeState` in device storage; `setExactAndAllowWhileIdle` for ask (N min) and deadline
+  (90 s); unanswered = `RingingService.recheck` rings the same alarm; snooze or a new ring cancels; re-registered on
+  boot; over 30 min overdue (phone off) it is dropped.
+
 ## 4. OS limits to respect (verify on device in Stage 4)
 - No app can block Home, Recents or power-off. "Bring back the ringing screen" = foreground service keeps ringing + re-posted full-screen intent; with the optional overlay permission the service relaunches the activity from the background. Without it, Android 10+ background-activity-launch rules only allow the notification.
 - Android 14+: USE_FULL_SCREEN_INTENT can be revoked by the user; check `canUseFullScreenIntent()` and fix from Độ tin cậy.
@@ -150,8 +170,9 @@ targetSdk stays 36 until Stage 2 reviews Android 17 behavior changes for alarms 
 - [x] Detector on luminance frames off main thread, perspective correction, fill-ratio cells, any rotation, 3 consecutive matches, no per-frame allocations; torch + auto-torch; JVM tests on synthetic samples (blue and black ink). Photographed samples: only the blank ref/ page so far; photos of real drawn codes come from the Stage 3 device test.
 - [x] QR/barcode register + scan, offline, no Play services; "Mất mã?" backup; camera-unavailable fallback to math.
 ### Stage 4 — other missions, profiles, safeguards
-- [ ] Math, Shake, Steps, Typing, Memory, Crumbs with difficulty + "Thử".
-- [ ] Sleeper profiles as one-tap presets; volume lock; return-to-ringing; awake check (4 min, 90 s); OS limits in §4 confirmed on device.
+- [x] Math, Shake, Steps, Typing, Memory, Crumbs with difficulty + "Thử"; chains of up to 3; snooze after mission.
+- [x] Sleeper profiles as one-tap presets; volume lock; return-to-ringing; awake check (4 min, 90 s); release v0.4.0.
+- [ ] OS limits in §4 confirmed on device (owner's Stage 4 device test).
 ### Stage 5 — customization and extras
 - [ ] Studio with token tweaks, live preview, saved presets; 4 home clock styles incl. Vietnamese word clock.
 - [ ] Timer + stopwatch, wake log with 14-day chart, bedtime reminder, widget in preset colors, JSON backup/restore, reduced-motion setting.

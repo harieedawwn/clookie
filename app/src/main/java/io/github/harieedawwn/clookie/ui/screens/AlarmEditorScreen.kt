@@ -31,6 +31,7 @@ import io.github.harieedawwn.clookie.design.TimeSize
 import io.github.harieedawwn.clookie.design.icons.ClookieIcon
 import io.github.harieedawwn.clookie.design.icons.ClookieIcons
 import io.github.harieedawwn.clookie.model.Alarm
+import io.github.harieedawwn.clookie.model.SleeperProfiles
 import io.github.harieedawwn.clookie.model.VibrationPattern
 import io.github.harieedawwn.clookie.model.countdown
 import io.github.harieedawwn.clookie.model.isSkippingNext
@@ -133,8 +134,9 @@ fun AlarmEditorScreen(
                     )
                     Tile(
                         ClookieIcons.Moon, stringResource(R.string.sleeper_profile),
-                        alarm.profile?.let { stringResource(it.nameRes) } ?: stringResource(R.string.custom),
+                        SleeperProfiles.matching(alarm)?.let { stringResource(it.nameRes) } ?: stringResource(R.string.custom),
                         Modifier.weight(1f),
+                        onClick = { open(EditorSheet.Profile) },
                     )
                 }
                 PillChip(
@@ -202,7 +204,10 @@ fun AlarmEditorScreen(
                 .navigationBarsPadding()
                 .padding(horizontal = Space.gutter, vertical = Space.s3),
         ) {
-            CookieButton(stringResource(R.string.action_save), { onSave(alarm) }, Modifier.fillMaxWidth(), icon = ClookieIcons.Check)
+            CookieButton(
+                stringResource(R.string.action_save), { onSave(alarm.copy(profile = SleeperProfiles.matching(alarm))) },
+                Modifier.fillMaxWidth(), icon = ClookieIcons.Check,
+            )
         }
 
         ClookieSheet(sheet != null, onDismiss = { sheet = null }) {
@@ -223,6 +228,7 @@ fun AlarmEditorScreen(
                 EditorSheet.Vibration -> VibrationSheet(alarm.vibration) { alarm = alarm.copy(vibration = it) }
                 EditorSheet.Snooze -> SnoozeSheet(alarm) { alarm = it }
                 EditorSheet.Missions -> MissionSheet(alarm.missions) { alarm = alarm.copy(missions = it) }
+                EditorSheet.Profile -> ProfileSheet(alarm) { alarm = it }
             }
         }
     }

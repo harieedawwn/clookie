@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,7 +42,8 @@ import java.time.LocalDate
 
 /**
  * Full-screen ringing screen, shown over the lock screen by the ringing notification's
- * full-screen intent. Closes itself when the ring ends; Back does nothing while ringing.
+ * full-screen intent. Closes itself when the ring ends; Back does nothing while ringing; the
+ * volume keys cannot lower a volume-locked alarm.
  */
 class RingingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +77,7 @@ class RingingActivity : AppCompatActivity() {
             ClookieTheme(Presets.byId(presetId)) {
                 CompositionLocalProvider(LocalNow provides rememberTicker()) {
                     val a = alarm
+                    SideEffect { lockVolume = a?.volumeLock == true }
                     if (a == null) {
                         Box(Modifier.fillMaxSize().background(Clookie.colors.ringing))
                     } else {
@@ -84,12 +88,32 @@ class RingingActivity : AppCompatActivity() {
                             onDismissed = { RingingService.dismiss(this@RingingActivity) },
                             onSnooze = { RingingService.snooze(this@RingingActivity) },
                             onInteract = RingEngine::interact,
+                            chainKey = ring?.let { "${it.alarmId}:${it.triggerAt}" },
                         )
                     }
                 }
             }
         }
     }
+
+    // The service brings this screen back while the alarm rings and it is not visible.
+    override fun onStart() {
+        super.onStart()
+        RingEngine.screenVisible = true
+    }
+
+    override fun onStop() {
+        RingEngine.screenVisible = false
+        super.onStop()
+    }
+
+    /** Volume lock: the volume keys cannot lower or mute the ringing alarm. */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (lockVolume && (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_MUTE)) return true
+        return super.onKeyDown(keyCode, event)
+    }
+
+    @Volatile private var lockVolume = false
 
     @Suppress("DEPRECATION")
     private fun showOverLockScreen() {

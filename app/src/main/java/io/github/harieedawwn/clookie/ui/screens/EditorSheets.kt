@@ -1,7 +1,9 @@
 package io.github.harieedawwn.clookie.ui.screens
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -57,7 +59,11 @@ import io.github.harieedawwn.clookie.mission.MissionRegistry
 import io.github.harieedawwn.clookie.mission.WakeMission
 import io.github.harieedawwn.clookie.ui.rememberPermissionRequest
 import io.github.harieedawwn.clookie.model.Alarm
+import io.github.harieedawwn.clookie.model.AwakeRules
 import io.github.harieedawwn.clookie.model.MissionSpec
+import io.github.harieedawwn.clookie.model.MissionType
+import io.github.harieedawwn.clookie.model.SleeperProfile
+import io.github.harieedawwn.clookie.model.SleeperProfiles
 import io.github.harieedawwn.clookie.model.VibrationPattern
 import io.github.harieedawwn.clookie.ui.Eyebrow
 import io.github.harieedawwn.clookie.ui.components.CookieButton
@@ -68,7 +74,7 @@ import io.github.harieedawwn.clookie.ui.components.icon
 import io.github.harieedawwn.clookie.ui.components.nameRes
 import io.github.harieedawwn.clookie.ui.components.pressable
 
-enum class EditorSheet { Keypad, Label, Sound, Volume, Vibration, Snooze, Missions }
+enum class EditorSheet { Keypad, Label, Sound, Volume, Vibration, Snooze, Missions, Profile }
 
 private val Volumes = listOf(20, 40, 60, 80, 100)
 private val Ramps = listOf(0, 10, 20, 60, 120)
@@ -292,8 +298,8 @@ fun MissionSheet(chain: List<MissionSpec>, onChange: (List<MissionSpec>) -> Unit
     val ask = rememberPermissionRequest { ok ->
         val m = pending
         pending = null
-        if (m != null && ok) onChange(chain + MissionRegistry.defaultSpec(m))
-        denied = if (ok) null else m
+        if (m != null && (ok || m.permissionsOptional)) onChange(chain + MissionRegistry.defaultSpec(m))
+        denied = if (ok || m?.permissionsOptional == true) null else m
     }
     Column(
         Modifier
@@ -374,6 +380,83 @@ fun MissionSheet(chain: List<MissionSpec>, onChange: (List<MissionSpec>) -> Unit
         Spacer(Modifier.height(Space.s3))
     }
 }
+
+/**
+ * Sleeper profiles as one-tap presets (Ngủ vừa: math or Crumbs), then the heavy-sleeper
+ * safeguards, each editable on its own. Ngủ say asks for the camera for its Cookie Code.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ProfileSheet(alarm: Alarm, onChange: (Alarm) -> Unit) {
+    val c = Clookie.colors
+    val inspection = LocalInspectionMode.current
+    val current = SleeperProfiles.matching(alarm)
+    // Without the camera the Cookie Code falls back to math at ring time; nothing to undo here.
+    val askCamera = rememberPermissionRequest { }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.82f)
+            .verticalScroll(rememberScrollState()),
+    ) {
+        SheetTitle(stringResource(R.string.sleeper_profile))
+        Column(verticalArrangement = Arrangement.spacedBy(Space.s3)) {
+            SleeperProfile.entries.forEach { p ->
+                val selected = current == p
+                val shape = Clookie.shapes.medium
+                val fg = if (selected) c.background else c.ink
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .pressable(shape, {
+                            onChange(SleeperProfiles.apply(alarm, p))
+                            if (p == SleeperProfile.Deep && !inspection) askCamera(listOf(Manifest.permission.CAMERA))
+                        }, shadow = false)
+                        .background(if (selected) c.ink else c.surface)
+                        .border(Stroke.regular, c.outline, shape)
+                        .padding(Space.s4),
+                ) {
+                    Txt(stringResource(p.nameRes), Clookie.type.heading, color = fg, maxLines = 1)
+                    Spacer(Modifier.height(Space.s1))
+                    Txt(stringResource(p.summaryRes), Clookie.type.label, color = fg, maxLines = 2)
+                }
+                if (selected && p == SleeperProfile.Medium) {
+                    val crumbs = alarm.missionTypes.first() == MissionType.Crumbs
+                    ChoiceChips(
+                        listOf(false to stringResource(R.string.mission_math), true to stringResource(R.string.mission_crumbs)),
+                        crumbs, { onChange(SleeperProfiles.apply(alarm, p, crumbs = it)) },
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(Space.s5))
+        Eyebrow(stringResource(R.string.safeguards))
+        Spacer(Modifier.height(Space.s2))
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.s2), verticalArrangement = Arrangement.spacedBy(Space.s2)) {
+            PillChip(stringResource(R.string.volume_lock), alarm.volumeLock, { onChange(alarm.copy(volumeLock = !alarm.volumeLock)) }, icon = ClookieIcons.Sound)
+            PillChip(stringResource(R.string.snooze_after_mission), alarm.snoozeAfterMission, { onChange(alarm.copy(snoozeAfterMission = !alarm.snoozeAfterMission)) }, icon = ClookieIcons.Snooze)
+            PillChip(stringResource(R.string.awake_check), alarm.awakeCheck, { onChange(alarm.copy(awakeCheck = !alarm.awakeCheck)) }, icon = ClookieIcons.Moon)
+        }
+        if (alarm.awakeCheck) {
+            Spacer(Modifier.height(Space.s4))
+            Txt(stringResource(R.string.awake_check_after), Clookie.type.label, color = c.inkMuted)
+            Spacer(Modifier.height(Space.s2))
+            ChoiceChips(
+                AwakeRules.minutes.map { it to stringResource(R.string.minutes_value, it) },
+                alarm.awakeCheckMinutes, { onChange(alarm.copy(awakeCheckMinutes = it)) },
+            )
+        }
+        Spacer(Modifier.height(Space.s3))
+    }
+}
+
+@get:StringRes
+private val SleeperProfile.summaryRes: Int
+    get() = when (this) {
+        SleeperProfile.Light -> R.string.profile_light_value
+        SleeperProfile.Medium -> R.string.profile_medium_value
+        SleeperProfile.Deep -> R.string.profile_deep_value
+    }
 
 @Composable
 fun rememberSoundName(id: String): String {

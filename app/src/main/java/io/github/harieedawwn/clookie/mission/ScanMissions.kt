@@ -42,6 +42,7 @@ import io.github.harieedawwn.clookie.design.rememberHaptics
 import io.github.harieedawwn.clookie.model.CookieCode
 import io.github.harieedawwn.clookie.model.MathProblem
 import io.github.harieedawwn.clookie.model.MissionSpec
+import io.github.harieedawwn.clookie.model.MissionTuning
 import io.github.harieedawwn.clookie.model.MissionType
 import io.github.harieedawwn.clookie.model.ScanCode
 import io.github.harieedawwn.clookie.model.ScanGate
@@ -167,9 +168,9 @@ private fun ScanMission(
         }
     }
     when (mode) {
-        ScanMode.Lost -> MathBackup(session, LostCodeProblems, null, modifier)
-        ScanMode.NoCamera -> MathBackup(
-            session, NoCameraProblems,
+        ScanMode.Lost -> MathPad(session, 3, LostCodeProblems, null, modifier)
+        ScanMode.NoCamera -> MathPad(
+            session, 3, NoCameraProblems,
             stringResource(if (hasCodes == false) R.string.scan_no_codes else R.string.scan_no_camera), modifier,
         )
         ScanMode.Scan -> BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
@@ -226,15 +227,18 @@ private fun ScanMission(
     }
 }
 
-/** [count] hard problems typed on a number pad; a wrong answer clears and buzzes. */
+/**
+ * [count] problems of [level] typed on a number pad; a wrong answer clears and buzzes. The Math
+ * mission and every fallback ("Mất mã?", no camera, no sensor) use it. [reason] says why it replaced a mission.
+ */
 @Composable
-internal fun MathBackup(session: MissionSession, count: Int, reason: String?, modifier: Modifier) {
+internal fun MathPad(session: MissionSession, level: Int, count: Int, reason: String?, modifier: Modifier) {
     val c = Clookie.colors
     val haptics = rememberHaptics()
     val seed = rememberSaveable { Random.nextLong() }
     var index by rememberSaveable { mutableIntStateOf(0) }
     var typed by rememberSaveable { mutableStateOf("") }
-    val problem = remember(index) { MathProblem.generate(3, Random(seed + index)) }
+    val problem = remember(index) { MathProblem.generate(level, Random(seed + index)) }
     BoxWithConstraints(modifier) {
     // Keys shrink on short screens so the whole pad stays above the snooze button.
     val key = ((maxHeight - (if (reason != null) 150.dp else 126.dp)) / 4 - Space.s2).coerceIn(40.dp, 52.dp)
@@ -262,7 +266,7 @@ internal fun MathBackup(session: MissionSession, count: Int, reason: String?, mo
         RingingNumberPad(
             onDigit = { d ->
                 session.interact()
-                if (typed.length < 4) typed += d
+                if (typed.length < MissionTuning.Math.MaxDigits) typed += d
             },
             onBackspace = {
                 session.interact()

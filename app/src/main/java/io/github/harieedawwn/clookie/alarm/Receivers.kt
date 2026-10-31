@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import io.github.harieedawwn.clookie.data.AlarmRepository
 import io.github.harieedawwn.clookie.data.RingStateStore
+import io.github.harieedawwn.clookie.model.AwakeEvent
 import io.github.harieedawwn.clookie.model.RingState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,8 +30,8 @@ class AlarmReceiver : BroadcastReceiver() {
 
 /**
  * Boot (also before the first unlock), clock or zone change, app update, exact-alarm grant:
- * re-register every alarm, ring slightly late ones, report missed ones, and resume a ring
- * that was in progress.
+ * re-register every alarm, ring slightly late ones, report missed ones, resume a ring that
+ * was in progress and a pending awake check.
  */
 class SystemEventsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -40,6 +41,8 @@ class SystemEventsReceiver : BroadcastReceiver() {
             try {
                 AlarmEngine.reschedule(app)
                 if (RingStateStore(app).read() is RingState.Ringing) RingingService.restore(app)
+                // Re-registers a pending awake check (alarms are cleared on reboot).
+                AwakeCheck.send(app, AwakeEvent.Due(System.currentTimeMillis()))
             } finally {
                 pending.finish()
             }

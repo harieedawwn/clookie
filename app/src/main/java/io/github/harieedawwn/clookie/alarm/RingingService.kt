@@ -16,12 +16,15 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import io.github.harieedawwn.clookie.RingingActivity
 import io.github.harieedawwn.clookie.data.AlarmRepository
 import io.github.harieedawwn.clookie.data.RingStateStore
 import io.github.harieedawwn.clookie.model.Alarm
+import io.github.harieedawwn.clookie.model.AwakeEvent
 import io.github.harieedawwn.clookie.model.RingEffect
 import io.github.harieedawwn.clookie.model.RingEvent
 import io.github.harieedawwn.clookie.model.RingOutcome
@@ -65,6 +68,9 @@ object RingEngine {
 
     internal fun ducked(): Boolean = SystemClock.elapsedRealtime() < duckUntil.value
 
+    /** The ringing screen is started and visible; the service brings it back when it is not. */
+    @Volatile var screenVisible = false
+
     private const val DuckMs = 20_000L
 }
 
@@ -85,6 +91,7 @@ class RingingService : Service() {
     private var savedAlarmVolume: Int? = null
     private var volumeJob: Job? = null
     private var tickJob: Job? = null
+    private var returnJob: Job? = null
     private var ringing: Alarm? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -115,6 +122,11 @@ class RingingService : Service() {
                         val a = r?.let { repo.get(it.alarmId) }
                         if (a != null) transition(RingEvent.Snooze(now, a.snoozeMinutes, a.snoozeCount, a.snoozeLimit))
                     }
+                    ACTION_RECHECK -> {
+                        // Awake check unanswered: ring the same alarm again, missions and all.
+                        val id = intent?.getLongExtra(AlarmReceiver.EXTRA_ALARM_ID, -1) ?: -1
+                        if (id >= 0) transition(RingEvent.Fire(id, now, now))
+                    }
                     ACTION_DISMISS -> transition(RingEvent.Dismiss(now))
                     else -> transition(RingEvent.Restore(now))
                 }
@@ -144,11 +156,18 @@ class RingingService : Service() {
                 startRinging(alarm)
             }
             RingEffect.StopRinging -> stopRinging()
-            is RingEffect.ScheduleSnooze -> repo.snooze(effect.alarmId, effect.at, effect.count)
+            is RingEffect.ScheduleSnooze -> {
+                repo.snooze(effect.alarmId, effect.at, effect.count)
+                AwakeCheck.send(this, AwakeEvent.Confirmed)
+            }
             is RingEffect.Finish -> {
                 val alarm = repo.get(effect.alarmId)
-                repo.finish(effect.alarmId, effect.outcome, effect.triggerAt, System.currentTimeMillis())
+                val now = System.currentTimeMillis()
+                repo.finish(effect.alarmId, effect.outcome, effect.triggerAt, now)
                 if (effect.outcome == RingOutcome.Missed && alarm != null) Notifications.missed(this, alarm, effect.triggerAt)
+                if (effect.outcome == RingOutcome.Dismissed && alarm != null) {
+                    AwakeCheck.send(this, AwakeEvent.Dismissed(alarm.id, alarm.awakeCheck, alarm.awakeCheckMinutes, now))
+                }
             }
         }
     }
@@ -156,6 +175,8 @@ class RingingService : Service() {
     private fun startRinging(alarm: Alarm) {
         stopRinging()
         ringing = alarm
+        // Ringing again answers a pending awake check.
+        AwakeCheck.send(this, AwakeEvent.Confirmed)
         val r = store.read() as? RingState.Ringing
         val n = Notifications.ringing(this, alarm, r?.triggerAt ?: System.currentTimeMillis())
         runCatching { NotificationManagerCompat.from(this).notify(Notifications.ID_RINGING, n) }
@@ -195,15 +216,48 @@ class RingingService : Service() {
                 // Perceptual ramp from quiet to full; ducked to 30% while a mission is in use.
                 val v = (0.08f + 0.92f * p * p) * (if (RingEngine.ducked()) 0.3f else 1f)
                 runCatching { player?.setVolume(v, v) }
+                // Volume lock: whatever lowers the alarm stream (keys, panel, another app) is undone.
+                if (alarm.volumeLock) runCatching {
+                    if (audio.getStreamVolume(AudioManager.STREAM_ALARM) < target) audio.setStreamVolume(AudioManager.STREAM_ALARM, target, 0)
+                }
                 delay(100)
             }
         }
+        returnJob = scope.launch { bringBackScreen(alarm) }
         tickJob = scope.launch {
             while (isActive) {
                 delay(30_000)
                 mutex.withLock {
                     transition(RingEvent.Tick(System.currentTimeMillis()))
                     if (store.read() == RingState.Idle) shutdown()
+                }
+            }
+        }
+    }
+
+    /**
+     * Return to ringing: while the ringing screen is not visible (Home, Recents, another app), it
+     * is relaunched when the overlay permission allows a background start and the screen is on;
+     * otherwise a full-screen alert is re-posted. The sound never stops meanwhile (OS limits: SPEC §4).
+     */
+    private suspend fun bringBackScreen(alarm: Alarm) {
+        var lastPing = 0L
+        while (true) {
+            delay(ReturnCheckMs)
+            val nm = NotificationManagerCompat.from(this)
+            if (RingEngine.screenVisible) {
+                nm.cancel(Notifications.ID_RETURN)
+                continue
+            }
+            val interactive = getSystemService(PowerManager::class.java).isInteractive
+            if (interactive && Settings.canDrawOverlays(this)) {
+                runCatching { startActivity(RingingActivity.intent(this)) }
+            } else if (SystemClock.elapsedRealtime() - lastPing >= ReturnPingMs) {
+                lastPing = SystemClock.elapsedRealtime()
+                val at = (store.read() as? RingState.Ringing)?.triggerAt ?: System.currentTimeMillis()
+                runCatching {
+                    nm.cancel(Notifications.ID_RETURN)
+                    nm.notify(Notifications.ID_RETURN, Notifications.returnPing(this, alarm, at))
                 }
             }
         }
@@ -230,8 +284,11 @@ class RingingService : Service() {
     private fun stopRinging() {
         volumeJob?.cancel()
         tickJob?.cancel()
+        returnJob?.cancel()
         volumeJob = null
         tickJob = null
+        returnJob = null
+        runCatching { NotificationManagerCompat.from(this).cancel(Notifications.ID_RETURN) }
         player?.runCatching { stop(); release() }
         player = null
         vibrator?.cancel()
@@ -281,12 +338,20 @@ class RingingService : Service() {
         const val ACTION_SNOOZE = "snooze"
         const val ACTION_DISMISS = "dismiss"
         const val ACTION_RESTORE = "restore"
+        const val ACTION_RECHECK = "recheck"
+        private const val ReturnCheckMs = 2_000L
+        private const val ReturnPingMs = 10_000L
 
         fun fire(context: Context, alarmId: Long, triggerAt: Long) = start(
             context,
             Intent(context, RingingService::class.java).setAction(ACTION_FIRE)
                 .putExtra(AlarmReceiver.EXTRA_ALARM_ID, alarmId)
                 .putExtra(AlarmReceiver.EXTRA_TRIGGER_AT, triggerAt),
+        )
+
+        fun recheck(context: Context, alarmId: Long) = start(
+            context,
+            Intent(context, RingingService::class.java).setAction(ACTION_RECHECK).putExtra(AlarmReceiver.EXTRA_ALARM_ID, alarmId),
         )
 
         fun restore(context: Context) = start(context, Intent(context, RingingService::class.java).setAction(ACTION_RESTORE))
@@ -309,7 +374,7 @@ class RingingService : Service() {
                 val at = intent.getLongExtra(AlarmReceiver.EXTRA_TRIGGER_AT, System.currentTimeMillis())
                 Notifications.createChannels(context)
                 NotificationManagerCompat.from(context).notify(Notifications.ID_RINGING, Notifications.ringing(context, null, at))
-                io.github.harieedawwn.clookie.RingingActivity.pendingStart = intent
+                RingingActivity.pendingStart = intent
             }
             false
         }

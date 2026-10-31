@@ -54,7 +54,8 @@
             android:showWhenLocked="true"
             android:taskAffinity="io.github.harieedawwn.clookie.ringing"
             android:theme="@style/Theme.Clookie.Ringing"
-            android:turnScreenOn="true" />
+            android:turnScreenOn="true"
+            android:windowSoftInputMode="adjustResize" />
 
         <service
             android:name=".alarm.RingingService"
@@ -64,6 +65,11 @@
 
         <receiver
             android:name=".alarm.AlarmReceiver"
+            android:directBootAware="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".alarm.AwakeReceiver"
             android:directBootAware="true"
             android:exported="false" />
 

@@ -20,7 +20,10 @@ object Notifications {
     const val CHANNEL_RINGING = "ringing"
     const val CHANNEL_MISSED = "missed"
     const val CHANNEL_UPDATES = "updates"
+    const val CHANNEL_AWAKE = "awake"
     const val ID_RINGING = 1
+    const val ID_RETURN = 2
+    const val ID_AWAKE = 3
     private const val ID_MISSED_BASE = 1000
 
     fun createChannels(context: Context) {
@@ -36,6 +39,10 @@ object Notifications {
                 },
                 NotificationChannel(CHANNEL_MISSED, context.getString(R.string.channel_missed), NotificationManager.IMPORTANCE_DEFAULT),
                 NotificationChannel(CHANNEL_UPDATES, context.getString(R.string.channel_updates), NotificationManager.IMPORTANCE_LOW),
+                // Default sound and vibration: the question has to be noticed by someone dozing off.
+                NotificationChannel(CHANNEL_AWAKE, context.getString(R.string.channel_awake), NotificationManager.IMPORTANCE_HIGH).apply {
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                },
             ),
         )
     }
@@ -71,6 +78,46 @@ object Notifications {
             }
         }
         return b.build()
+    }
+
+    /**
+     * Return to ringing without the overlay permission: a fresh (not silent, so it peeks)
+     * alert with the same full-screen intent, re-posted while the ringing screen is away.
+     */
+    fun returnPing(context: Context, alarm: Alarm, triggerAt: Long): Notification {
+        val time = Instant.ofEpochMilli(triggerAt).atZone(ZoneId.systemDefault())
+        val screen = PendingIntent.getActivity(
+            context, 0, RingingActivity.intent(context),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        return NotificationCompat.Builder(context, CHANNEL_RINGING)
+            .setSmallIcon(R.drawable.ic_stat_clookie)
+            .setContentTitle("%02d:%02d".format(time.hour, time.minute))
+            .setContentText(alarm.label.ifBlank { context.getString(R.string.nav_alarms) })
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setContentIntent(screen)
+            .setFullScreenIntent(screen, true)
+            .setAutoCancel(true)
+            .build()
+    }
+
+    /** "Còn thức không?" until [until]; answering (or tapping it) confirms. */
+    fun awake(context: Context, until: Long) {
+        val confirm = AwakeCheck.confirmPending(context)
+        val n = NotificationCompat.Builder(context, CHANNEL_AWAKE)
+            .setSmallIcon(R.drawable.ic_stat_clookie)
+            .setContentTitle(context.getString(R.string.awake_title))
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setContentIntent(confirm)
+            .addAction(0, context.getString(R.string.awake_yes), confirm)
+            .setTimeoutAfter((until - System.currentTimeMillis()).coerceAtLeast(1_000L))
+            .setAutoCancel(true)
+            .build()
+        runCatching { NotificationManagerCompat.from(context).notify(ID_AWAKE, n) }
     }
 
     fun missed(context: Context, alarm: Alarm, triggerAt: Long) {

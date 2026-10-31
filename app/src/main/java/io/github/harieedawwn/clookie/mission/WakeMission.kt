@@ -3,6 +3,7 @@ package io.github.harieedawwn.clookie.mission
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import io.github.harieedawwn.clookie.model.MissionSpec
 import io.github.harieedawwn.clookie.model.MissionType
@@ -23,6 +24,9 @@ interface WakeMission {
 
     /** Runtime permissions the mission needs (e.g. CAMERA); asked inline before it is added. */
     val permissions: List<String> get() = emptyList()
+
+    /** The mission still works without [permissions] (Steps: accelerometer instead of the step sensor). */
+    val permissionsOptional: Boolean get() = false
 
     /**
      * Mission UI, hosted in the ringing screen's mission slot on the `ringing` color.
@@ -64,12 +68,24 @@ data class MissionSetting(
     val valueLabels: List<Int>? = null,
 )
 
+/**
+ * Screenshots and previews: no sensors, camera or game loop; missions draw a fixed mid-game
+ * frame instead of falling back to math.
+ */
+val LocalMissionDemo = staticCompositionLocalOf { false }
+
 /** All missions this build ships. Stages 3-4 add one line each. */
 object MissionRegistry {
     val all: List<WakeMission> = listOf(
         ClassicMission,
         CookieCodeMission,
         QrMission,
+        MathMission,
+        ShakeMission,
+        StepsMission,
+        TypingMission,
+        MemoryMission,
+        CrumbsMission,
     )
 
     fun of(type: MissionType): WakeMission? = all.firstOrNull { it.type == type }

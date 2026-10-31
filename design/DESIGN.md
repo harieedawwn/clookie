@@ -60,7 +60,10 @@ list rows with trailing switch), emoji or Material icons on main screens, explan
 - `EditorExtras(spec, onChange)`: optional editor content under the chips for choices that are not fixed numbers
   (scan missions: which code, and the code screens in a `ClookieOverlay`).
 - `quickDismiss`: true only for trivial missions (Classic); allows "Tắt" in the notification.
-  `permissions`: runtime permissions needed (camera, activity), asked inline before the mission is added.
+  `permissions`: runtime permissions needed (camera, activity), asked inline before the mission is added;
+  `permissionsOptional` adds it anyway (Steps falls back to the accelerometer).
+- Games (Memory, Crumbs, Shake/Steps dial) draw on a Canvas in the draw phase, two flat tones (`ringing`/`onRinging`),
+  bite and chip motif, targets >= 48 dp; tunables only in `model/MissionTuning`; `LocalMissionDemo` for screenshots.
 - `session.preview` is the editor's "Thử": no sound, completing returns to the editor.
 - Unknown or unregistered types run as Classic (`MissionRegistry.resolve`), so a chain can always be stopped.
 
