@@ -13,7 +13,7 @@
 
     <string name="mission_classic">Trượt để tắt</string>
     <string name="mission_cookie_code">Cookie Code</string>
-    <string name="mission_qr">Mã QR</string>
+    <string name="mission_qr">QR · mã vạch</string>
     <string name="mission_math">Toán</string>
     <string name="mission_shake">Lắc</string>
     <string name="mission_steps">Đi bộ</string>
@@ -156,6 +156,41 @@
     <string name="update_failed">Lỗi, thử lại</string>
     <string name="update_checking">Đang kiểm tra</string>
     <string name="update_downloading">Đang tải %1$d%%</string>
+
+    <!-- Stage 3: Cookie Code, QR / barcode -->
+    <string name="code_to_scan">Mã cần quét</string>
+    <string name="code_any">Mã bất kỳ</string>
+    <string name="code_new">Mã mới</string>
+    <string name="code_mine">Mã của tôi</string>
+    <string name="code_default_name">Mã %1$d</string>
+    <string name="code_name">Tên mã</string>
+    <string name="code_shuffle">Đổi mẫu</string>
+    <string name="code_test">Quét thử</string>
+    <string name="code_test_ok">Quét được</string>
+    <string name="code_save_image">Lưu ảnh</string>
+    <string name="code_image_saved">Đã lưu ảnh</string>
+    <string name="code_none">Chưa có mã</string>
+    <string name="code_space_full">Hết mẫu mới</string>
+    <string name="guide_step">%1$d/%2$d</string>
+    <string name="cd_play">Phát</string>
+    <string name="cd_pause">Tạm dừng</string>
+    <string name="cd_step_back">Bước trước</string>
+    <string name="cd_step_next">Bước sau</string>
+    <string name="qr_add">Thêm mã</string>
+    <string name="qr_point">Đưa mã vào khung</string>
+    <string name="qr_again">Quét lại</string>
+    <string name="scan_wrong">Sai mã</string>
+    <string name="scan_torch">Đèn</string>
+    <string name="scan_lost">Mất mã?</string>
+    <string name="scan_no_camera">Không mở được camera</string>
+    <string name="scan_no_codes">Chưa có mã để quét</string>
+    <string name="camera_needed">Cần quyền camera</string>
+    <string name="backup_progress">Câu %1$d/%2$d</string>
+    <string name="format_qr" translatable="false">QR</string>
+    <string name="format_ean13" translatable="false">EAN-13</string>
+    <string name="format_ean8" translatable="false">EAN-8</string>
+    <string name="format_upce" translatable="false">UPC-E</string>
+    <string name="format_code128" translatable="false">Code 128</string>
 
     <string-array name="weekday_short">
         <item>T2</item><item>T3</item><item>T4</item><item>T5</item><item>T6</item><item>T7</item><item>CN</item>

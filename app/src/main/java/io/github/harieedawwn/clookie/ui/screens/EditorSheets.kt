@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -53,6 +54,8 @@ import io.github.harieedawwn.clookie.design.Stroke
 import io.github.harieedawwn.clookie.design.icons.ClookieIcon
 import io.github.harieedawwn.clookie.design.icons.ClookieIcons
 import io.github.harieedawwn.clookie.mission.MissionRegistry
+import io.github.harieedawwn.clookie.mission.WakeMission
+import io.github.harieedawwn.clookie.ui.rememberPermissionRequest
 import io.github.harieedawwn.clookie.model.Alarm
 import io.github.harieedawwn.clookie.model.MissionSpec
 import io.github.harieedawwn.clookie.model.VibrationPattern
@@ -275,11 +278,29 @@ fun SnoozeSheet(alarm: Alarm, onChange: (Alarm) -> Unit) {
     }
 }
 
-/** Mission chain (up to 3) with each mission's difficulty settings, plus missions to add. */
+/**
+ * Mission chain (up to 3) with each mission's difficulty settings and extras, plus missions to
+ * add. A mission that needs a runtime permission (camera) asks for it before it is added.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MissionSheet(chain: List<MissionSpec>, onChange: (List<MissionSpec>) -> Unit) {
     val c = Clookie.colors
-    Column(Modifier.fillMaxWidth()) {
+    val inspection = LocalInspectionMode.current
+    var pending by remember { mutableStateOf<WakeMission?>(null) }
+    var denied by remember { mutableStateOf<WakeMission?>(null) }
+    val ask = rememberPermissionRequest { ok ->
+        val m = pending
+        pending = null
+        if (m != null && ok) onChange(chain + MissionRegistry.defaultSpec(m))
+        denied = if (ok) null else m
+    }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.82f)
+            .verticalScroll(rememberScrollState()),
+    ) {
         SheetTitle(stringResource(R.string.missions))
         Column(verticalArrangement = Arrangement.spacedBy(Space.s3)) {
             chain.forEachIndexed { index, spec ->
@@ -320,6 +341,7 @@ fun MissionSheet(chain: List<MissionSpec>, onChange: (List<MissionSpec>) -> Unit
                             },
                         )
                     }
+                    mission.EditorExtras(resolved) { updated -> onChange(chain.mapIndexed { i, s -> if (i == index) updated else s }) }
                 }
             }
         }
@@ -329,13 +351,24 @@ fun MissionSheet(chain: List<MissionSpec>, onChange: (List<MissionSpec>) -> Unit
             Spacer(Modifier.height(Space.s4))
             Eyebrow(stringResource(R.string.mission_add))
             Spacer(Modifier.height(Space.s2))
-            Row(horizontalArrangement = Arrangement.spacedBy(Space.s2)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(Space.s2), verticalArrangement = Arrangement.spacedBy(Space.s2)) {
                 addable.forEach { m ->
                     PillChip(
                         stringResource(m.type.nameRes), selected = false, icon = m.type.icon,
-                        onClick = { onChange(chain + MissionRegistry.defaultSpec(m)) },
+                        onClick = {
+                            if (m.permissions.isEmpty() || inspection) {
+                                onChange(chain + MissionRegistry.defaultSpec(m))
+                            } else {
+                                pending = m
+                                ask(m.permissions)
+                            }
+                        },
                     )
                 }
+            }
+            if (denied != null) {
+                Spacer(Modifier.height(Space.s2))
+                Txt(stringResource(R.string.camera_needed), Clookie.type.label, color = c.accent)
             }
         }
         Spacer(Modifier.height(Space.s3))

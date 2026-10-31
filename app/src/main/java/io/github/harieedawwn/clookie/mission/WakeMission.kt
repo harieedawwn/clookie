@@ -30,6 +30,13 @@ interface WakeMission {
      */
     @Composable
     fun Content(session: MissionSession, modifier: Modifier)
+
+    /**
+     * Optional editor content under the setting chips, for choices that are not fixed numbers
+     * (e.g. which of the user's codes to scan, and managing those codes).
+     */
+    @Composable
+    fun EditorExtras(spec: MissionSpec, onChange: (MissionSpec) -> Unit) {}
 }
 
 /** What a running mission can see and do. */
@@ -61,6 +68,8 @@ data class MissionSetting(
 object MissionRegistry {
     val all: List<WakeMission> = listOf(
         ClassicMission,
+        CookieCodeMission,
+        QrMission,
     )
 
     fun of(type: MissionType): WakeMission? = all.firstOrNull { it.type == type }

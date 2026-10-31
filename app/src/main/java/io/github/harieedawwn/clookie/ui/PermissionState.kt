@@ -14,9 +14,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import io.github.harieedawwn.clookie.data.SettingsStore
 import io.github.harieedawwn.clookie.reliability.PermItem
@@ -116,11 +119,42 @@ fun rememberPermissionActions(store: SettingsStore): PermissionActions {
     }
 }
 
-private fun Context.findActivity(): Activity? {
+internal fun Context.findActivity(): Activity? {
     var c: Context? = this
     while (c is ContextWrapper) {
         if (c is Activity) return c
         c = c.baseContext
     }
     return null
+}
+
+/**
+ * Inline runtime-permission request for features that need one (a mission's camera). Returns a
+ * launcher taking the permissions; [onResult] gets true when all are granted. When a permission
+ * is denied for good, its settings page opens instead, like on the permission screen.
+ */
+@Composable
+fun rememberPermissionRequest(onResult: (Boolean) -> Unit): (List<String>) -> Unit {
+    val context = LocalContext.current
+    val result by rememberUpdatedState(onResult)
+    var asked by remember { mutableStateOf(emptyList<String>()) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
+        val ok = asked.all { granted[it] == true }
+        val activity = context.findActivity()
+        if (!ok && activity != null) {
+            val forGood = asked.firstOrNull { granted[it] != true && !ActivityCompat.shouldShowRequestPermissionRationale(activity, it) }
+            PermItem.entries.firstOrNull { forGood != null && Permissions.runtimePermission(it) == forGood }
+                ?.let { Permissions.openSettings(context, it) }
+        }
+        result(ok)
+    }
+    return { permissions ->
+        val missing = permissions.filter { ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED }
+        if (missing.isEmpty()) {
+            result(true)
+        } else {
+            asked = missing
+            launcher.launch(missing.toTypedArray())
+        }
+    }
 }

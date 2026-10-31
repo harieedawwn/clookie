@@ -107,6 +107,26 @@ targetSdk stays 36 until Stage 2 reviews Android 17 behavior changes for alarms 
 - **Volume**: the alarm stream is set to the alarm's volume while ringing and restored afterwards; the ramp and the mission ducking (30% for 20 s after each interaction) scale the player volume.
 - **Schema**: Room v1 is frozen as of Stage 2 (v0.1.0 never opened the database). From now on every change bumps the version with a Migration; no destructive fallback.
 
+### Cookie Code and QR (Stage 3; checked 2026-11-01 against Google Maven and Maven Central)
+- **Detector** (`model/CookieDetector`, pure Kotlin on the Y plane, no OpenCV): 5x5 box blur; paper white = local max over
+  ~12-16 px; ink = darker than 0.7 of it; 3x3 opening drops printed lines; per blob: outer contour, corners, one-sided
+  line fit per side, homography; paper and ink levels as planes (outer ring / frame cells); cell = share of central
+  samples darker than the midpoint (frame >= 0.5 each, pattern cell >= 0.4); match in 4 rotations, never mirrored.
+  Accepted after 3 consecutive matching frames (`ScanGate`). Pattern codes are >= 2 cells apart, so one misread cell
+  can only give "no code", never another code.
+- **Synthetic set** (`SyntheticCamera`, generated at test time from ref/notebook-paper.jpg, never committed): ink on the
+  photo's real 8 mm squares (hatching 70-95 %, overflow, outlines), pinhole camera (f 500 px, tilt 0-45°, any roll,
+  80-320 px), blur, gradient, vignette, lamp shadows (penumbra 0.04-0.2 rad x f), dim + noise, torch hot spot.
+  200 positive scenes (blue/black) + 100 negatives (paper, scribbles, handwriting, other patterns, other codes), 3 frames
+  each. Result: 96.5 % detected within 3 frames (94.7 % per frame), 0 false matches, ~3.5-5.6 ms per 640x480 frame on
+  the dev PC (JVM), 0 bytes allocated per frame. Not modeled: hard sunlight shadows.
+- **Camera**: CameraX 1.6.2, preview via `CameraXViewfinder`, analysis 640x480 YUV with STRATEGY_KEEP_ONLY_LATEST (late
+  frames are dropped) on one background thread; no frames for 6 s while visible = camera error -> math.
+- **QR / barcode**: ZXing core 3.5.4 (pure Java, offline, no Play services, JVM-testable; ML Kit's bundled model is
+  larger and native). Formats: QR, EAN-13/8, UPC-A (stored as EAN-13)/UPC-E, Code 128. Every other frame is read turned
+  90° so barcodes work in both phone orientations; a code must be read twice within 4 frames.
+- **Fallbacks**: "Mất mã?" = 15 level-3 problems; no camera permission, camera error or no saved code = 5 problems.
+
 ## 4. OS limits to respect (verify on device in Stage 4)
 - No app can block Home, Recents or power-off. "Bring back the ringing screen" = foreground service keeps ringing + re-posted full-screen intent; with the optional overlay permission the service relaunches the activity from the background. Without it, Android 10+ background-activity-launch rules only allow the notification.
 - Android 14+: USE_FULL_SCREEN_INTENT can be revoked by the user; check `canUseFullScreenIntent()` and fix from Độ tin cậy.
@@ -125,10 +145,10 @@ targetSdk stays 36 until Stage 2 reviews Android 17 behavior changes for alarms 
 - [x] Updater: daily + manual check of latest GitHub release, inline banner, download, system installer.
 - [x] Sound synthesis script committed; release v0.2.0.
 ### Stage 3 — Cookie Code + QR/barcode
-- [ ] Code generator rules (3-6 cells, asymmetric, >= 2 cells apart under rotation) with unit tests; multiple named codes.
-- [ ] Drawing guide animation (frame then pattern, play/pause, step, "2/3"), "Quét thử", "Lưu ảnh" PNG.
-- [ ] Detector on luminance frames off main thread, perspective correction, fill-ratio cells, any rotation, 3 consecutive matches, no per-frame allocations; torch + auto-torch; JVM tests on synthetic and photographed samples (blue and black ink).
-- [ ] QR/barcode register + scan, offline, no Play services; "Mất mã?" backup; camera-unavailable fallback to math.
+- [x] Code generator rules (3-6 cells, asymmetric, >= 2 cells apart under rotation) with unit tests; multiple named codes.
+- [x] Drawing guide animation (frame then pattern, play/pause, step, "2/3"), "Quét thử", "Lưu ảnh" PNG.
+- [x] Detector on luminance frames off main thread, perspective correction, fill-ratio cells, any rotation, 3 consecutive matches, no per-frame allocations; torch + auto-torch; JVM tests on synthetic samples (blue and black ink). Photographed samples: only the blank ref/ page so far; photos of real drawn codes come from the Stage 3 device test.
+- [x] QR/barcode register + scan, offline, no Play services; "Mất mã?" backup; camera-unavailable fallback to math.
 ### Stage 4 — other missions, profiles, safeguards
 - [ ] Math, Shake, Steps, Typing, Memory, Crumbs with difficulty + "Thử".
 - [ ] Sleeper profiles as one-tap presets; volume lock; return-to-ringing; awake check (4 min, 90 s); OS limits in §4 confirmed on device.

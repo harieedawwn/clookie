@@ -108,6 +108,33 @@ interface AlarmDao {
     suspend fun log(entry: WakeLogEntity)
 }
 
+@Dao
+interface CodeDao {
+    @Query("SELECT * FROM cookie_codes ORDER BY createdAt")
+    fun observeCookieCodes(): Flow<List<CookieCodeEntity>>
+
+    @Query("SELECT * FROM cookie_codes ORDER BY createdAt")
+    suspend fun cookieCodes(): List<CookieCodeEntity>
+
+    @Insert
+    suspend fun insertCookieCode(code: CookieCodeEntity): Long
+
+    @Query("DELETE FROM cookie_codes WHERE id = :id")
+    suspend fun deleteCookieCode(id: Long)
+
+    @Query("SELECT * FROM scan_codes ORDER BY createdAt")
+    fun observeScanCodes(): Flow<List<ScanCodeEntity>>
+
+    @Query("SELECT * FROM scan_codes ORDER BY createdAt")
+    suspend fun scanCodes(): List<ScanCodeEntity>
+
+    @Insert
+    suspend fun insertScanCode(code: ScanCodeEntity): Long
+
+    @Query("DELETE FROM scan_codes WHERE id = :id")
+    suspend fun deleteScanCode(id: Long)
+}
+
 @Database(
     entities = [AlarmEntity::class, CookieCodeEntity::class, ScanCodeEntity::class, WakeLogEntity::class],
     version = 1,
@@ -115,6 +142,8 @@ interface AlarmDao {
 )
 abstract class ClookieDatabase : RoomDatabase() {
     abstract fun alarms(): AlarmDao
+
+    abstract fun codes(): CodeDao
 
     companion object {
         @Volatile private var instance: ClookieDatabase? = null

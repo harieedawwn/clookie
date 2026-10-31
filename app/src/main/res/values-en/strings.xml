@@ -10,7 +10,7 @@
 
     <string name="mission_classic">Slide</string>
     <string name="mission_cookie_code">Cookie Code</string>
-    <string name="mission_qr">QR code</string>
+    <string name="mission_qr">QR · barcode</string>
     <string name="mission_math">Math</string>
     <string name="mission_shake">Shake</string>
     <string name="mission_steps">Steps</string>
@@ -153,6 +153,36 @@
     <string name="update_failed">Failed, retry</string>
     <string name="update_checking">Checking</string>
     <string name="update_downloading">Downloading %1$d%%</string>
+
+    <!-- Stage 3: Cookie Code, QR / barcode -->
+    <string name="code_to_scan">Code to scan</string>
+    <string name="code_any">Any code</string>
+    <string name="code_new">New code</string>
+    <string name="code_mine">My codes</string>
+    <string name="code_default_name">Code %1$d</string>
+    <string name="code_name">Code name</string>
+    <string name="code_shuffle">New pattern</string>
+    <string name="code_test">Test scan</string>
+    <string name="code_test_ok">Scanned</string>
+    <string name="code_save_image">Save image</string>
+    <string name="code_image_saved">Image saved</string>
+    <string name="code_none">No codes yet</string>
+    <string name="code_space_full">No new patterns left</string>
+    <string name="guide_step">%1$d/%2$d</string>
+    <string name="cd_play">Play</string>
+    <string name="cd_pause">Pause</string>
+    <string name="cd_step_back">Previous step</string>
+    <string name="cd_step_next">Next step</string>
+    <string name="qr_add">Add code</string>
+    <string name="qr_point">Fit the code in the frame</string>
+    <string name="qr_again">Scan again</string>
+    <string name="scan_wrong">Wrong code</string>
+    <string name="scan_torch">Torch</string>
+    <string name="scan_lost">Lost the code?</string>
+    <string name="scan_no_camera">Camera unavailable</string>
+    <string name="scan_no_codes">No code to scan</string>
+    <string name="camera_needed">Camera permission needed</string>
+    <string name="backup_progress">Problem %1$d/%2$d</string>
 
     <string-array name="weekday_short">
         <item>Mo</item><item>Tu</item><item>We</item><item>Th</item><item>Fr</item><item>Sa</item><item>Su</item>

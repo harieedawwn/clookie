@@ -43,6 +43,9 @@ list rows with trailing switch), emoji or Material icons on main screens, explan
 - `RingingLayout` (full-bleed `ringing`, giant time, wobbling mark, mission slot, snooze slot), `SlideToStop`,
   `Modifier.biteAway` (dismissal bite), `ClookieMark`/`ClookieLockup` (logo), `Tile`, `SettingsRow`, `Eyebrow`, `TopBar`.
 - Missions plug into `RingingLayout(mission = …)` and must use these tokens; scan screens keep the ringing color frame.
+- Scan missions: `ScanWindow` (square camera, brackets, 3 progress dots, "Sai mã" pill), `RingingChip`,
+  `RingingNumberPad`, `CookieGuide` (Giấy ô li paper + pen animation in every preset) and `CookieCodeIcon`.
+  The ringing layout lets the mission size itself first; the cookie takes what is left; short screens get 0.7x numerals.
 - `PermissionRow` (status badge, "Bỏ qua", "Cấp") in a `RowGroup`; `ChoiceChips` for every editor-sheet choice;
   `UpdateBanner` inline on Home. Editor settings open as `ClookieSheet`s (never dialogs or stock pickers).
 
@@ -54,6 +57,8 @@ list rows with trailing switch), emoji or Material icons on main screens, explan
 - `Content(session, modifier)`: drawn in the mission slot on the `ringing` color with `onRinging` ink, Clookie
   components only. Call `session.interact()` on every touch (ducks the alarm to 30% for 20 s) and
   `session.complete()` once when solved; the host runs the next mission of the chain (max 3) or the bite.
+- `EditorExtras(spec, onChange)`: optional editor content under the chips for choices that are not fixed numbers
+  (scan missions: which code, and the code screens in a `ClookieOverlay`).
 - `quickDismiss`: true only for trivial missions (Classic); allows "Tắt" in the notification.
   `permissions`: runtime permissions needed (camera, activity), asked inline before the mission is added.
 - `session.preview` is the editor's "Thử": no sound, completing returns to the editor.
