@@ -31,6 +31,8 @@ import java.time.LocalDateTime
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class Stage4Shots {
+    @get:org.junit.Rule val fontScale = FontScaleRule()
+
     private val now = mutableStateOf(LocalDateTime.of(2026, 11, 2, 6, 31))
 
     private fun shot(name: String, content: @Composable () -> Unit) {

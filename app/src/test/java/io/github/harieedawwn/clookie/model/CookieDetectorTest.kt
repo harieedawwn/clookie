@@ -24,7 +24,8 @@ class CookieDetectorTest {
         val rnd = Random(2026_11_01)
         return List(PositiveScenes) { i ->
             val ink = if (i % 2 == 0) SyntheticCamera.Ink.Blue else SyntheticCamera.Ink.Black
-            val pattern = CookiePattern.generate(emptyList(), rnd)!!
+            // Every valid pattern size (new codes prefer 3 cells; older ones have up to 6).
+            val pattern = CookiePattern.candidates(emptyList()).random(rnd)
             val grid = SyntheticCamera.randomGrid(rnd)
             val layer = SyntheticCamera.inkLayer(grid, 1.0, ink, rnd)
             SyntheticCamera.drawMarker(layer, grid, pattern, rnd)

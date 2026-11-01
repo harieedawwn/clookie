@@ -8,9 +8,11 @@ import android.util.Size
 import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceOrientedMeteringPointFactory
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
@@ -107,8 +109,18 @@ fun CameraFeed(
         }
         camera = bound
         torchAvailable(bound.cameraInfo.hasFlashUnit())
+        // Zoomed in, the code fills the window from 12-15 cm, where phone cameras focus sharply
+        // (at 1x it had to be held about 5 cm away, closer than most can focus).
+        val maxZoom = bound.cameraInfo.zoomState.value?.maxZoomRatio ?: 1f
+        runCatching { bound.cameraControl.setZoomRatio(ScanZoom.coerceAtMost(maxZoom)) }
+        val centre = FocusMeteringAction.Builder(SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(0.5f, 0.5f))
+            .disableAutoCancel()
+            .build()
+        var ticks = 0
         try {
             while (true) {
+                // Re-focus on the centre now and then: paper moves closer and further while aiming.
+                if (ticks++ % FocusEverySec == 0) runCatching { bound.cameraControl.startFocusAndMetering(centre) }
                 delay(1000)
                 val now = SystemClock.elapsedRealtime()
                 if (!owner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
@@ -134,6 +146,8 @@ fun CameraFeed(
 }
 
 private const val StallMs = 6000L
+private const val ScanZoom = 2f
+private const val FocusEverySec = 3
 
 /** Copies the Y plane into a reused array (rows keep the plane's stride). */
 private class YPlane {

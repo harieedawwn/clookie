@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -162,7 +163,7 @@ private fun WakeRow(e: WakeEntry, zone: ZoneId) {
             .padding(horizontal = Space.s4, vertical = Space.s3),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.width(56.dp)) {
+        Column(Modifier.widthIn(min = 56.dp).padding(end = Space.s2)) {
             Txt(weekdays[day.dayOfWeek.value - 1], Clookie.type.label, color = c.inkMuted, maxLines = 1)
             Txt("%d/%d".format(day.dayOfMonth, day.monthValue), Clookie.type.bodyStrong, maxLines = 1)
         }
@@ -173,7 +174,7 @@ private fun WakeRow(e: WakeEntry, zone: ZoneId) {
                 if (e.outcome != RingOutcome.Missed) add(stringResource(R.string.time_to_dismiss, durationText(e.timeToDismissMs)))
                 if (e.snoozes > 0) add(stringResource(R.string.snoozes_n, e.snoozes))
             }
-            if (parts.isNotEmpty()) Txt(parts.joinToString(" · "), Clookie.type.label, color = c.inkMuted, maxLines = 1)
+            if (parts.isNotEmpty()) Txt(parts.joinToString(" · "), Clookie.type.label, color = c.inkMuted, maxLines = 2)
         }
         val tag = when {
             e.onTime -> stringResource(R.string.on_time)

@@ -46,6 +46,7 @@ class SettingsStore(context: Context) {
     private val onboardedKey = booleanPreferencesKey("onboarded")
     private val skippedKey = stringSetPreferencesKey("skipped_permissions")
     private val autostartKey = booleanPreferencesKey("autostart_visited")
+    private val visitedKey = stringSetPreferencesKey("visited_pages")
     private val defaultSoundKey = stringPreferencesKey("default_sound")
     private val lastCheckKey = longPreferencesKey("update_last_check")
     private val updateVersionKey = stringPreferencesKey("update_version")
@@ -62,7 +63,10 @@ class SettingsStore(context: Context) {
     val presetId: Flow<String?> = data.data.map { it[presetKey] }
     val onboarded: Flow<Boolean> = data.data.map { it[onboardedKey] ?: false }
     val skippedPermissions: Flow<Set<String>> = data.data.map { it[skippedKey] ?: emptySet() }
-    val autostartVisited: Flow<Boolean> = data.data.map { it[autostartKey] ?: false }
+    /** Permission rows (PermItem names) whose unreadable settings page was opened. */
+    val visitedPages: Flow<Set<String>> = data.data.map {
+        (it[visitedKey] ?: emptySet()) + (if (it[autostartKey] == true) setOf("Autostart") else emptySet())
+    }
     val defaultSound: Flow<String> = data.data.map { it[defaultSoundKey] ?: Alarm.DefaultSound }
     val update: Flow<UpdateInfo?> = data.data.map { p ->
         val v = p[updateVersionKey]
@@ -122,7 +126,7 @@ class SettingsStore(context: Context) {
     suspend fun lastUpdateCheck(): Long = data.data.first()[lastCheckKey] ?: 0L
 
     suspend fun setOnboarded() = data.edit { it[onboardedKey] = true }
-    suspend fun setAutostartVisited() = data.edit { it[autostartKey] = true }
+    suspend fun setVisited(item: String) = data.edit { it[visitedKey] = (it[visitedKey] ?: emptySet()) + item }
     suspend fun setDefaultSound(id: String) = data.edit { it[defaultSoundKey] = id }
 
     suspend fun setSkipped(item: String, skipped: Boolean) = data.edit {

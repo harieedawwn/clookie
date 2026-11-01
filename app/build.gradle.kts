@@ -64,7 +64,11 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
-            all { it.systemProperty("robolectric.graphicsMode", "NATIVE") }
+            all {
+                it.systemProperty("robolectric.graphicsMode", "NATIVE")
+                // Screenshot font scale review: gradlew :app:recordRoborazziDebug -PfontScale=1.3
+                it.systemProperty("clookie.fontScale", project.findProperty("fontScale")?.toString() ?: "1.0")
+            }
         }
     }
 }

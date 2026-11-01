@@ -40,6 +40,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "vi-w412dp-h915dp-xhdpi")
 class DesignSystemShots {
+    @get:org.junit.Rule val fontScale = FontScaleRule()
+
 
     @Test
     fun componentSheets() {

@@ -5,12 +5,21 @@ package io.github.harieedawwn.clookie.reliability
  * across ROM versions, tried in order; every one can be missing, so callers always fall
  * back to the app details page.
  */
-enum class Oem(val brands: List<String>, val pages: List<Pair<String, String>>) {
+enum class Oem(
+    val brands: List<String>,
+    val pages: List<Pair<String, String>>,
+    /** "Show on lock screen" / "pop-up windows while in background" toggles, where the ROM has its own. */
+    val lockScreenPages: List<Pair<String, String>> = emptyList(),
+) {
     Xiaomi(
         listOf("xiaomi", "redmi", "poco"),
         listOf(
             "com.miui.securitycenter" to "com.miui.permcenter.autostart.AutoStartManagementActivity",
             "com.miui.securitycenter" to "com.miui.powercenter.PowerSettings",
+        ),
+        listOf(
+            "com.miui.securitycenter" to "com.miui.permcenter.permissions.PermissionsEditorActivity",
+            "com.miui.securitycenter" to "com.miui.permcenter.permissions.AppPermissionsEditorActivity",
         ),
     ),
     Oppo(

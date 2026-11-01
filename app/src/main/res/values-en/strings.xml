@@ -143,6 +143,7 @@
     <string name="perm_activity">Physical activity</string>
     <string name="perm_install">Install updates</string>
     <string name="perm_overlay">Display over apps</string>
+    <string name="perm_lockscreen">Show on lock screen</string>
     <string name="reliability_ok">All good</string>
     <string name="reliability_issues">To fix: %1$d</string>
     <string name="all_permissions">All permissions</string>

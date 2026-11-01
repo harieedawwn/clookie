@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -78,8 +79,11 @@ fun RingingScreen(
     val months = stringArrayResource(R.array.month_names)
     val dateText = stringResource(R.string.date_format, weekdays[date.dayOfWeek.value - 1], date.dayOfMonth, date.monthValue, months[date.monthValue - 1])
     val now = LocalNow.current
-    val hour = if (preview) alarm.hour else now.value.hour
-    val minute = if (preview) alarm.minute else now.value.minute
+    // Derived, so the screen (and the mission in it, camera included) recomposes once a minute,
+    // not on every tick.
+    val nowMinute by remember(now) { derivedStateOf { now.value.hour * 60 + now.value.minute } }
+    val hour = if (preview) alarm.hour else nowMinute / 60
+    val minute = if (preview) alarm.minute else nowMinute % 60
     val chain = alarm.missions
     val c = Clookie.colors
 

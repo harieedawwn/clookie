@@ -146,6 +146,7 @@
     <string name="perm_activity">Hoạt động thể chất</string>
     <string name="perm_install">Cài bản cập nhật</string>
     <string name="perm_overlay">Hiện trên ứng dụng khác</string>
+    <string name="perm_lockscreen">Hiện trên màn hình khoá</string>
     <string name="reliability_ok">Mọi thứ ổn</string>
     <string name="reliability_issues">%1$d mục cần sửa</string>
     <string name="all_permissions">Tất cả quyền</string>

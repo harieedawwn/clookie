@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -113,7 +114,7 @@ fun CookieButton(
             ClookieIcon(icon, null, tint = fg, size = 22.dp)
             Spacer(Modifier.width(Space.s2))
         }
-        Txt(text, Clookie.type.heading, color = fg, maxLines = 1)
+        Txt(text, Clookie.type.heading, color = fg, maxLines = 2, align = TextAlign.Center)
     }
 }
 
@@ -222,7 +223,7 @@ fun <T> Segmented(
                     .padding(horizontal = Space.s3),
                 contentAlignment = Alignment.Center,
             ) {
-                Txt(label, Clookie.type.bodyStrong, color = if (isSel) c.background else c.ink, maxLines = 1)
+                Txt(label, Clookie.type.bodyStrong, color = if (isSel) c.background else c.ink, maxLines = 2, align = TextAlign.Center)
             }
         }
     }

@@ -23,6 +23,7 @@ import io.github.harieedawwn.clookie.design.Stroke
 import io.github.harieedawwn.clookie.design.icons.ClookieIcon
 import io.github.harieedawwn.clookie.design.icons.ClookieIcons
 import io.github.harieedawwn.clookie.reliability.PermItem
+import io.github.harieedawwn.clookie.reliability.visitOnly
 import io.github.harieedawwn.clookie.reliability.PermRow
 import io.github.harieedawwn.clookie.reliability.PermState
 import io.github.harieedawwn.clookie.ui.IconChip
@@ -67,7 +68,7 @@ private fun StatusBadge(row: PermRow) {
     val shape = pillShape()
     val (text, bg, fg) = when (row.state) {
         PermState.Granted -> Triple(
-            stringResource(if (row.item == PermItem.Autostart) R.string.perm_opened else R.string.perm_granted),
+            stringResource(if (row.item.visitOnly) R.string.perm_opened else R.string.perm_granted),
             c.accentSoft, c.onAccentSoft,
         )
         PermState.Missing -> Triple(stringResource(R.string.perm_missing), c.accent, c.onAccent)

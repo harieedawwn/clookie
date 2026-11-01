@@ -101,7 +101,7 @@ object Updater {
 
     /** Opens the system installer, or the "install unknown apps" page if that is not allowed yet. */
     fun install(context: Context, apk: File): Boolean {
-        if (!Permissions.isGranted(context, PermItem.InstallUpdates, false)) {
+        if (!Permissions.isGranted(context, PermItem.InstallUpdates, emptySet())) {
             Permissions.openSettings(context, PermItem.InstallUpdates)
             return false
         }

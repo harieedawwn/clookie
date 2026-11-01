@@ -68,7 +68,9 @@ object Notifications {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setAutoCancel(false)
-            .setSilent(true)
+            // Not setSilent: it puts the notification in a "silent" group whose full-screen intent
+            // Android 13+ blocks (the alarm rang with no screen). The channel is silent already.
+            .setOnlyAlertOnce(true)
             .setContentIntent(screen)
             .setFullScreenIntent(screen, true)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)

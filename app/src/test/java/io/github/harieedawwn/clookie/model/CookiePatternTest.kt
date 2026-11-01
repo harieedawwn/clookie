@@ -64,14 +64,23 @@ class CookiePatternTest {
     }
 
     @Test
-    fun gateNeedsThreeConsecutiveFramesOfTheSameCode() {
+    fun gateNeedsThreeFramesOfTheSameCodeAndToleratesShortGaps() {
         val g = ScanGate(3)
         assertFalse(g.feed(5))
         assertFalse(g.feed(5))
         assertFalse(g.feed(ScanGate.NoMatch))
+        assertTrue(g.feed(5)) // one blurred frame in between does not restart
+        g.reset()
         assertFalse(g.feed(5))
-        assertFalse(g.feed(6))
+        repeat(3) { assertFalse(g.feed(ScanGate.NoMatch)) } // three blank frames do
+        assertFalse(g.feed(5))
+        assertFalse(g.feed(6)) // another code restarts
         assertFalse(g.feed(6))
         assertTrue(g.feed(6))
+    }
+
+    @Test
+    fun newCodesUseAsFewCellsAsPossible() {
+        assertEquals(3, Integer.bitCount(CookiePattern.generate(emptyList(), Random(1))!!))
     }
 }

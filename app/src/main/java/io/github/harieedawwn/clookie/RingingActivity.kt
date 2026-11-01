@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat
 import io.github.harieedawwn.clookie.alarm.RingEngine
 import io.github.harieedawwn.clookie.alarm.RingingService
 import io.github.harieedawwn.clookie.data.AlarmRepository
+import io.github.harieedawwn.clookie.data.RingStateStore
 import io.github.harieedawwn.clookie.data.SettingsStore
 import io.github.harieedawwn.clookie.design.Clookie
 import io.github.harieedawwn.clookie.design.ClookieTheme
@@ -51,6 +52,7 @@ class RingingActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         // Fallback path: the service could not start from the background, start it now we are visible.
+        val waitForRing = pendingStart != null
         pendingStart?.let { runCatching { ContextCompat.startForegroundService(this, it) } }
         pendingStart = null
 
@@ -65,8 +67,9 @@ class RingingActivity : AppCompatActivity() {
                 if (ring != null) {
                     seenRinging = true
                 } else {
-                    // Opened a moment before the service published the ring: give it time.
-                    if (!seenRinging) delay(4000)
+                    // Opened before the service published the ring (cold start after boot can be slow);
+                    // a stale notification after the ring ended closes at once.
+                    if (!seenRinging && (waitForRing || RingStateStore(this@RingingActivity).read() is RingState.Ringing)) delay(15_000)
                     finish()
                 }
             }

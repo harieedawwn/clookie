@@ -26,6 +26,7 @@ import io.github.harieedawwn.clookie.reliability.PermItem
 import io.github.harieedawwn.clookie.reliability.PermRow
 import io.github.harieedawwn.clookie.reliability.PermState
 import io.github.harieedawwn.clookie.reliability.Permissions
+import io.github.harieedawwn.clookie.reliability.visitOnly
 import kotlinx.coroutines.launch
 
 /**
@@ -36,7 +37,7 @@ import kotlinx.coroutines.launch
 fun rememberPermissionRows(store: SettingsStore): State<List<PermRow>> {
     val context = LocalContext.current
     val skipped by store.skippedPermissions.collectAsState(initial = emptySet())
-    val visited by store.autostartVisited.collectAsState(initial = false)
+    val visited by store.visitedPages.collectAsState(initial = emptySet())
     var resumes by remember { mutableIntStateOf(0) }
     LifecycleResumeEffect(Unit) {
         resumes++
@@ -86,7 +87,7 @@ fun rememberPermissionActions(store: SettingsStore): PermissionActions {
         if (perm != null) {
             runtime.launch(perm)
         } else {
-            if (item == PermItem.Autostart) scope.launch { store.setAutostartVisited() }
+            if (item.visitOnly) scope.launch { store.setVisited(item.name) }
             if (Permissions.openSettings(context, item)) waitingResume = true else {
                 queue = queue.drop(1)
                 next()

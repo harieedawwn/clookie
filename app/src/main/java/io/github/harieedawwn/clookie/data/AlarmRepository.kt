@@ -21,6 +21,7 @@ import io.github.harieedawwn.clookie.model.SleeperProfile
 import io.github.harieedawwn.clookie.model.VibrationPattern
 import io.github.harieedawwn.clookie.model.lateFire
 import io.github.harieedawwn.clookie.model.nextRing
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -106,21 +107,21 @@ class AlarmRepository private constructor(context: Context) {
     /** Restore from a backup: every alarm and code is replaced, ids kept. */
     suspend fun replaceAll(alarms: List<Alarm>, cookie: List<CookieCodeEntity>, scan: List<ScanCodeEntity>) {
         mutate {
-            dao.all().forEach {
-                scheduler.cancel(it.id)
-                dao.delete(it.id)
-            }
-            val codes = db.codes()
-            codes.deleteAllCookieCodes()
-            codes.deleteAllScanCodes()
-            cookie.forEach { codes.insertCookieCode(it) }
-            scan.forEach { codes.insertScanCode(it) }
+            val old = dao.all().map { it.id }
             val now = System.currentTimeMillis()
-            alarms.forEach { a ->
-                val clean = a.copy(snoozedUntil = null, snoozeCount = 0, oneShotAt = null, kind = AlarmKind.Alarm)
-                dao.upsert(clean.toEntity(null, now))
-                sync(clean)
+            val clean = alarms.map { it.copy(snoozedUntil = null, snoozeCount = 0, oneShotAt = null, kind = AlarmKind.Alarm) }
+            // All or nothing: a broken file must not leave the user with no alarms and no codes.
+            db.withTransaction {
+                old.forEach { dao.delete(it) }
+                val codes = db.codes()
+                codes.deleteAllCookieCodes()
+                codes.deleteAllScanCodes()
+                cookie.forEach { codes.insertCookieCode(it) }
+                scan.forEach { codes.insertScanCode(it) }
+                clean.forEach { dao.upsert(it.toEntity(null, now)) }
             }
+            old.forEach { scheduler.cancel(it) }
+            clean.forEach { sync(it) }
         }
     }
 

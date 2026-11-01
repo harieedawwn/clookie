@@ -67,6 +67,7 @@ val PermItem.icon: ImageVector
         PermItem.Activity -> ClookieIcons.Steps
         PermItem.InstallUpdates -> ClookieIcons.Download
         PermItem.Overlay -> ClookieIcons.Layers
+        PermItem.LockScreen -> ClookieIcons.Lock
     }
 
 @get:StringRes
@@ -81,6 +82,7 @@ val PermItem.nameRes: Int
         PermItem.Activity -> R.string.perm_activity
         PermItem.InstallUpdates -> R.string.perm_install
         PermItem.Overlay -> R.string.perm_overlay
+        PermItem.LockScreen -> R.string.perm_lockscreen
     }
 
 @Composable

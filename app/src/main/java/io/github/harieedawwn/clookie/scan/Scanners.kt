@@ -52,7 +52,7 @@ abstract class Scanner : FrameSink {
 }
 
 /**
- * Cookie Code scanning: accepts one of [targets] after 3 consecutive matching frames.
+ * Cookie Code scanning: accepts one of [targets] after 3 matching frames ([ScanGate]).
  * Allocation-free per frame. [targets] may change from the UI thread.
  */
 class CookieScanner(targets: List<CookieCode>) : Scanner() {

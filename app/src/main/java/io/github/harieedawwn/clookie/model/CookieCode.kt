@@ -56,7 +56,12 @@ object CookiePattern {
     /** All valid patterns given the user's [others]; empty when the code space is used up. */
     fun candidates(others: Collection<Int>): List<Int> = (0..0x1FF).filter { isValid(it, others) }
 
-    fun generate(others: Collection<Int>, random: Random = Random.Default): Int? = candidates(others).randomOrNull(random)
+    /** A random valid pattern with as few cells as the user's [others] allow (less to draw). */
+    fun generate(others: Collection<Int>, random: Random = Random.Default): Int? {
+        val all = candidates(others)
+        val fewest = all.minOfOrNull { Integer.bitCount(it) } ?: return null
+        return all.filter { Integer.bitCount(it) == fewest }.random(random)
+    }
 
     /** Marker cell (row, col) in 0..4 is ink: the ring, or a set pattern cell. */
     fun markerCell(pattern: Int, row: Int, col: Int): Boolean =
@@ -85,21 +90,23 @@ data class CookieCode(val id: Long, val name: String, val pattern: Int)
 data class ScanCode(val id: Long, val name: String, val format: String, val value: String)
 
 /**
- * Accepts a code only after [required] consecutive frames agree on it. Any other frame
- * (nothing seen, another code) restarts the count. Allocation-free.
+ * Accepts a code once [required] frames agree on it with at most [maxGap] blank frames in a
+ * row between them (a shaky hand or a blurred frame does not restart). Another code restarts
+ * the count. Allocation-free.
  */
-class ScanGate(private val required: Int = 3) {
+class ScanGate(private val required: Int = 3, private val maxGap: Int = 2) {
     var streak = 0
         private set
     private var current = NoMatch
+    private var gap = 0
 
     /** Feed one frame's matched code id (or [NoMatch]); returns true once accepted. */
     fun feed(id: Long): Boolean {
         if (id == NoMatch) {
-            streak = 0
-            current = NoMatch
+            if (++gap > maxGap) reset()
             return false
         }
+        gap = 0
         streak = if (id == current) streak + 1 else 1
         current = id
         return streak >= required
@@ -108,6 +115,7 @@ class ScanGate(private val required: Int = 3) {
     fun reset() {
         streak = 0
         current = NoMatch
+        gap = 0
     }
 
     companion object {

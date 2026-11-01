@@ -198,4 +198,15 @@ targetSdk stays 36 until Stage 2 reviews Android 17 behavior changes for alarms 
 - [x] Timer + stopwatch, wake log with 14-day chart, bedtime reminder, widget in preset colors, JSON backup/restore, reduced-motion setting; release v0.5.0.
 - [ ] Widget, timer in the background and bedtime reminder confirmed on device (owner's Stage 5 device test).
 ### Stage 6 — review and v1.0.0
-- [ ] Full review against this spec and the forbidden list; fixes; performance pass (no dropped frames on a weak phone, recomposition counts); v1.0.0 release.
+- [x] Full review against this spec and the forbidden list; fixes; performance pass (no dropped frames on a weak phone, recomposition counts); v1.0.0 release.
+
+### Stage 6 decisions (2026-11-01)
+- Ringing notification no longer uses `setSilent` (its "silent" group made Android 13+ block the full-screen intent:
+  the alarm rang with no screen); `setOnlyAlertOnce` instead. The ringing screen is started at once when the phone
+  is in use. Overlay ("Hiện trên ứng dụng khác") is now **required**, plus a Xiaomi-only "Hiện trên màn hình khoá"
+  row (MIUI's own lock-screen/background pop-up toggles; counts once opened).
+- Cookie Code made easier: scan at 2x zoom with centre refocus every 3 s (hold 12-15 cm, sharp focus); ScanGate
+  accepts 3 matching frames with up to 2 blank frames between; frame cells need 35 % ink, pattern cells 33 %; outline
+  check tolerates wobbly edges; new codes use as few cells as possible (3). Synthetic set (all pattern sizes): 97 %
+  detected within 3 frames, 0 false matches. Loose 55 %-coverage hatching measured 93.5 % (not a test target).
+- Restore runs in one Room transaction; ringing screen recomposes once a minute; labels wrap instead of "…".

@@ -46,6 +46,8 @@ import java.time.LocalDateTime
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ScreenshotTest {
+    @get:org.junit.Rule val fontScale = FontScaleRule()
+
     private val now = mutableStateOf(LocalDateTime.of(2026, 11, 2, 23, 18))
     private val reviewPresets = listOf(Presets.BoSua, Presets.Socola, Presets.GiayOLi)
 

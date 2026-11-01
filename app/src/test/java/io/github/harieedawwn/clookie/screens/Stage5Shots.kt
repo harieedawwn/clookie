@@ -42,6 +42,8 @@ import java.time.ZoneId
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class Stage5Shots {
+    @get:org.junit.Rule val fontScale = FontScaleRule()
+
     private val now = mutableStateOf(LocalDateTime.of(2026, 11, 2, 23, 18, 7))
     private val zone = ZoneId.systemDefault()
     private val wall = now.value.atZone(zone).toInstant().toEpochMilli()

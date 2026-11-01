@@ -17,7 +17,7 @@ import kotlin.math.sqrt
  *    per side (robust to rounded corners and overflow), corners from line intersections.
  * 4. Homography onto the 5x5 marker; paper (outside ring) and ink (frame cells) levels are
  *    fitted as planes so light gradients cancel; every cell is decided by the share of
- *    its central samples darker than the paper/ink midpoint. The frame must be solid.
+ *    its central samples darker than the paper/ink midpoint. The frame must be mostly inked.
  *
  * One instance per analysis thread. Buffers are allocated on the first frame of a given size;
  * after that [detect] allocates nothing.
@@ -495,8 +495,9 @@ class CookieDetector(val maxMarkers: Int = 4) {
             qx[s] = x
             qy[s] = y
         }
-        // Every side must be traced along most of its length (10 bins, at most 2 empty).
-        val tol = 2f + 0.012f * perimeter
+        // Every side must be traced along most of its length (10 bins, at most 3 empty; hand-drawn
+        // edges wobble).
+        val tol = 2f + 0.02f * perimeter
         for (s in 0 until 4) {
             val e = (s + 1) % 4
             val dx = qx[e] - qx[s]
@@ -509,7 +510,7 @@ class CookieDetector(val maxMarkers: Int = 4) {
                 if (t < 0f || t >= 1f) continue
                 bins = bins or (1 shl (t * 10).toInt())
             }
-            if (Integer.bitCount(bins) < 8) return RejectOutline
+            if (Integer.bitCount(bins) < 7) return RejectOutline
         }
         return -1
     }
@@ -784,10 +785,11 @@ class CookieDetector(val maxMarkers: Int = 4) {
         private const val MaxContour = 8192
         private const val MaxSamples = 256
         private const val MinContrast = 14f
-        private const val FrameFill = 0.5f
+        // Loose hatching is enough: a frame cell needs a third of its centre inked.
+        private const val FrameFill = 0.35f
         // One split for pattern cells: codes differ in >= 2 cells, so a misread cell gives no
         // code at all rather than another one; the 3-frame gate absorbs it.
-        private const val CellFill = 0.4f
+        private const val CellFill = 0.33f
 
         const val RejectContour = 0
         const val RejectCorners = 1

@@ -36,6 +36,8 @@ import java.time.LocalDateTime
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class Stage3Shots {
+    @get:org.junit.Rule val fontScale = FontScaleRule()
+
     private val now = mutableStateOf(LocalDateTime.of(2026, 11, 2, 6, 31))
     private val cookie = listOf(CookieCode(1, "Phòng tắm", 0b010_011_100), CookieCode(2, "Bếp", 0b001_101_110))
     private val scan = listOf(

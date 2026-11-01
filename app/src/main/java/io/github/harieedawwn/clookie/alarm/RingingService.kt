@@ -239,14 +239,18 @@ class RingingService : Service() {
     }
 
     /**
-     * Return to ringing: while the ringing screen is not visible (Home, Recents, another app), it
-     * is relaunched when the overlay permission allows a background start and the screen is on;
-     * otherwise a full-screen alert is re-posted. The sound never stops meanwhile (OS limits: SPEC §4).
+     * Ringing screen up front, and return to ringing: while the screen is not visible (phone in
+     * use, Home, Recents, another app), it is started directly when the overlay permission allows a
+     * background start and the screen is on (Android shows a full-screen intent only as a heads-up
+     * then); otherwise a full-screen alert is re-posted. The sound never stops meanwhile (SPEC §4).
      */
     private suspend fun bringBackScreen(alarm: Alarm) {
-        var lastPing = 0L
+        var lastPing = SystemClock.elapsedRealtime() // the ringing notification just carried the full-screen intent
+        var first = true
         while (true) {
-            delay(ReturnCheckMs)
+            // First check at once: when the phone is in use, the screen must open right away.
+            if (!first) delay(ReturnCheckMs)
+            first = false
             val nm = NotificationManagerCompat.from(this)
             if (RingEngine.screenVisible) {
                 nm.cancel(Notifications.ID_RETURN)
