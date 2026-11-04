@@ -1,5 +1,7 @@
 package io.github.harieedawwn.clookie.mission
 
+import io.github.harieedawwn.clookie.data.SettingsStore
+import androidx.compose.runtime.collectAsState
 import android.Manifest
 import android.content.Context
 import android.graphics.Bitmap
@@ -363,6 +365,10 @@ private fun NewCookieCode(
 private fun DrawingGuide(pattern: Int) {
     val c = Clookie.colors
     val reduced = Clookie.motion.reduced
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val store = remember { SettingsStore(context) }
+    val squares by store.cookieCell.collectAsState(initial = 4)
     val total = guideSteps(pattern).size
     var step by rememberSaveable(pattern) { mutableIntStateOf(0) }
     var playing by rememberSaveable(pattern) { mutableStateOf(!reduced) }
@@ -389,7 +395,15 @@ private fun DrawingGuide(pattern: Int) {
             .border(Stroke.regular, c.outline, shape)
             .padding(Space.s2),
     ) {
-        CookieGuide(pattern, step, { progress.value }, Modifier.fillMaxWidth())
+        CookieGuide(pattern, step, { progress.value }, Modifier.fillMaxWidth(), cellSquares = squares)
+    }
+    Spacer(Modifier.height(Space.s3))
+    // Cell size in notebook squares: 3x3 (30 mm, quickest to fill), 4x4 (40 mm), 5x5 (50 mm, scans from further).
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s2)) {
+        Eyebrow(stringResource(R.string.code_cell_size))
+        for (k in 3..5) {
+            PillChip(stringResource(R.string.code_cell_n, k), selected = squares == k, onClick = { scope.launch { store.setCookieCell(k) } })
+        }
     }
     Spacer(Modifier.height(Space.s3))
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s3)) {

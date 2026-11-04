@@ -14,6 +14,9 @@ import io.github.harieedawwn.clookie.model.ScanGate
 /** Receives camera luminance frames on the analysis thread. */
 fun interface FrameSink {
     fun onFrame(y: ByteArray, width: Int, height: Int, rowStride: Int)
+
+    /** Frames arrive with blue ink darkened ([io.github.harieedawwn.clookie.model.InkPlane]). */
+    val blueInk: Boolean get() = false
 }
 
 /**
@@ -57,6 +60,7 @@ abstract class Scanner : FrameSink {
  */
 class CookieScanner(targets: List<CookieCode>) : Scanner() {
     override val required = 3
+    override val blueInk = true
     private val detector = CookieDetector()
     private val gate = ScanGate(required)
     @Volatile private var ids = LongArray(0)

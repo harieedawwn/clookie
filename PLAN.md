@@ -16,4 +16,5 @@ Stage 5: model/WordClock + model/Extras (wake stats, stopwatch, timer, bedtime);
 adjustAccent); data/Backup (schema 1); alarm/Bedtime (reminder + AlarmSideEffects); widget/ClookieWidget.
 Decisions in SPEC §3 "Customization and extras (Stage 5)". Screenshots: design/screens/s5_*.
 Stage 6: decisions in SPEC §5 "Stage 6 decisions". Screenshots at 1.3: `gradlew :app:recordRoborazziDebug "-PfontScale=1.3"`.
+v1.1.0: Cookie Code blue ink + cell size, Báo động đỏ, slide fix, new Giòn tan (SPEC §5 "v1.1.0").
 Done. Next step: owner device tests (locked + in-use alarm, Cookie Code scan, widget, timer killed, backup restore).

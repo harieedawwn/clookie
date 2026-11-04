@@ -55,6 +55,7 @@ class SettingsStore(context: Context) {
     private val customKey = stringPreferencesKey("custom_presets")
     private val clockStyleKey = stringPreferencesKey("clock_style")
     private val reducedMotionKey = booleanPreferencesKey("reduced_motion")
+    private val cookieCellKey = intPreferencesKey("cookie_cell")
     private val sleepGoalKey = intPreferencesKey("sleep_goal")
     private val bedtimeKey = booleanPreferencesKey("bedtime_on")
     private val timerKey = stringPreferencesKey("timer")
@@ -79,6 +80,9 @@ class SettingsStore(context: Context) {
     val customPresets: Flow<List<CustomPreset>> = data.data.map { CustomPreset.decodeAll(it[customKey]) }
     val clockStyle: Flow<ClockStyle> = data.data.map { p -> ClockStyle.entries.firstOrNull { it.name == p[clockStyleKey] } ?: ClockStyle.Digital }
     val reducedMotion: Flow<Boolean> = data.data.map { it[reducedMotionKey] ?: false }
+
+    /** Notebook squares per Cookie Code cell side (3, 4 or 5): the marker is 5 cells of 2 mm squares. */
+    val cookieCell: Flow<Int> = data.data.map { it[cookieCellKey] ?: 4 }
     val sleepGoal: Flow<Int> = data.data.map { it[sleepGoalKey] ?: Bedtime.DefaultGoal }
     val bedtimeOn: Flow<Boolean> = data.data.map { it[bedtimeKey] ?: false }
     val timer: Flow<TimerState> = data.data.map { TimerState.decode(it[timerKey]) }
@@ -95,6 +99,7 @@ class SettingsStore(context: Context) {
     suspend fun setCustomPresets(list: List<CustomPreset>) = data.edit { it[customKey] = CustomPreset.encodeAll(list) }
     suspend fun setClockStyle(style: ClockStyle) = data.edit { it[clockStyleKey] = style.name }
     suspend fun setReducedMotion(on: Boolean) = data.edit { it[reducedMotionKey] = on }
+    suspend fun setCookieCell(squares: Int) = data.edit { it[cookieCellKey] = squares.coerceIn(3, 5) }
     suspend fun setSleepGoal(minutes: Int) = data.edit { it[sleepGoalKey] = minutes }
     suspend fun setBedtime(on: Boolean) = data.edit { it[bedtimeKey] = on }
     suspend fun setTimer(t: TimerState) = data.edit { it[timerKey] = t.encode() }

@@ -30,6 +30,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -132,6 +135,7 @@ fun SlideToStop(label: String, onDone: () -> Unit, modifier: Modifier = Modifier
     val motion = Clookie.motion
     val haptics = rememberHaptics()
     val offset = remember { Animatable(0f) }
+    var drag by remember { mutableFloatStateOf(0f) }
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
     val crisp = Clookie.shapes.smallRadius < 6.dp
@@ -166,15 +170,29 @@ fun SlideToStop(label: String, onDone: () -> Unit, modifier: Modifier = Modifier
                 .clip(trackShape)
                 .background(c.onRinging)
                 .draggable(
-                    rememberDraggableState { d -> scope.launch { offset.snapTo((offset.value + d).coerceIn(0f, maxPx)) } },
+                    // The thumb follows the finger exactly: deltas are applied synchronously (one
+                    // coroutine per delta used to cancel the previous snap, so the thumb lagged and
+                    // a full swipe often fell short of the end).
+                    rememberDraggableState { d ->
+                        drag = (drag + d).coerceIn(0f, maxPx)
+                        scope.launch { offset.snapTo(drag) }
+                    },
                     Orientation.Horizontal,
-                    onDragStarted = { onDrag() },
-                    onDragStopped = {
-                        if (offset.value > maxPx * 0.82f) {
-                            offset.animateTo(maxPx, motion.snappy())
+                    onDragStarted = {
+                        offset.stop()
+                        drag = offset.value
+                        onDrag()
+                    },
+                    onDragStopped = { velocity ->
+                        // Past 60 %, or a quick flick to the right past 25 %, stops the alarm.
+                        val flick = velocity > with(density) { 900.dp.toPx() } && drag > maxPx * 0.25f
+                        if (drag > maxPx * 0.6f || flick) {
+                            drag = maxPx
                             haptics.confirm()
                             onDone()
+                            offset.animateTo(maxPx, motion.snappy())
                         } else {
+                            drag = 0f
                             offset.animateTo(0f, motion.playful())
                         }
                     },

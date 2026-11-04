@@ -11,6 +11,10 @@ object SleeperProfiles {
         mapOf(MissionKeys.Level to MissionTuning.Crumbs.DefaultLevel, MissionKeys.Count to MissionTuning.Crumbs.DefaultCount),
     )
     val DeepChain = listOf(MissionSpec(MissionType.CookieCode), MediumMath)
+    val CrazyMath = MissionSpec(MissionType.Math, mapOf(MissionKeys.Level to 3, MissionKeys.Count to 5))
+    val CrazyChain = listOf(MissionSpec(MissionType.CookieCode), CrazyMath, MissionSpec(MissionType.Classic))
+    const val CrazySound = "clookie:siren"
+    const val CrazyAwakeMinutes = 2
 
     /** Applies [profile]; Ngủ vừa uses Crumbs instead of math when [crumbs]. */
     fun apply(alarm: Alarm, profile: SleeperProfile, crumbs: Boolean = false): Alarm = when (profile) {
@@ -27,6 +31,13 @@ object SleeperProfiles {
             volumeLock = true, snoozeAfterMission = true, awakeCheck = true, awakeCheckMinutes = AwakeRules.DefaultMinutes,
             profile = profile,
         )
+        // Siren at full volume at once (boosted past the stream maximum by the service), no snooze,
+        // code + 5 hard problems + a slide, strongest vibration, awake check after 2 minutes.
+        SleeperProfile.Crazy -> alarm.copy(
+            missions = CrazyChain, sound = CrazySound, volume = 100, rampSeconds = 0, vibration = VibrationPattern.Max,
+            snoozeLimit = 0, volumeLock = true, snoozeAfterMission = false, awakeCheck = true, awakeCheckMinutes = CrazyAwakeMinutes,
+            profile = profile,
+        )
     }
 
     /** The profile the alarm's fields still match (code choice and other settings may differ), or null. */
@@ -38,6 +49,9 @@ object SleeperProfiles {
                 alarm.rampSeconds == 20 && alarm.snoozeLimit == 2 && !alarm.volumeLock && !alarm.snoozeAfterMission && !alarm.awakeCheck
             SleeperProfile.Deep -> alarm.missionTypes == DeepChain.map { it.type } && alarm.missions[1] == MediumMath &&
                 alarm.volume == 100 && alarm.rampSeconds == 0 && alarm.volumeLock && alarm.snoozeAfterMission && alarm.awakeCheck
+            SleeperProfile.Crazy -> alarm.missionTypes == CrazyChain.map { it.type } && alarm.missions[1] == CrazyMath &&
+                alarm.sound == CrazySound && alarm.volume == 100 && alarm.rampSeconds == 0 && alarm.snoozeLimit == 0 &&
+                alarm.vibration == VibrationPattern.Max && alarm.volumeLock && alarm.awakeCheck
         }
     }
 }

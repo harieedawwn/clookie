@@ -401,7 +401,7 @@ fun ProfileSheet(alarm: Alarm, onChange: (Alarm) -> Unit) {
     ) {
         SheetTitle(stringResource(R.string.sleeper_profile))
         Column(verticalArrangement = Arrangement.spacedBy(Space.s3)) {
-            SleeperProfile.entries.forEach { p ->
+            SleeperProfile.entries.filter { it != SleeperProfile.Crazy }.forEach { p ->
                 val selected = current == p
                 val shape = Clookie.shapes.medium
                 val fg = if (selected) c.background else c.ink
@@ -446,6 +446,33 @@ fun ProfileSheet(alarm: Alarm, onChange: (Alarm) -> Unit) {
                 alarm.awakeCheckMinutes, { onChange(alarm.copy(awakeCheckMinutes = it)) },
             )
         }
+        // Báo động đỏ sits apart, at the bottom, in the ringing color: not one of the normal choices.
+        Spacer(Modifier.height(Space.s6))
+        Eyebrow(stringResource(R.string.profile_extreme))
+        Spacer(Modifier.height(Space.s2))
+        val crazy = current == SleeperProfile.Crazy
+        val shape = Clookie.shapes.medium
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .pressable(shape, {
+                    onChange(SleeperProfiles.apply(alarm, SleeperProfile.Crazy))
+                    if (!inspection) askCamera(listOf(Manifest.permission.CAMERA))
+                })
+                .background(c.ringing)
+                .border(Stroke.regular, c.outline, shape)
+                .padding(Space.s4),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ClookieIcon(ClookieIcons.Alarm, null, tint = c.onRinging, size = 28.dp)
+            Spacer(Modifier.width(Space.s3))
+            Column(Modifier.weight(1f)) {
+                Txt(stringResource(R.string.profile_crazy), Clookie.type.title, color = c.onRinging, maxLines = 1)
+                Spacer(Modifier.height(Space.s1))
+                Txt(stringResource(R.string.profile_crazy_value), Clookie.type.label, color = c.onRinging, maxLines = 2)
+            }
+            if (crazy) ClookieIcon(ClookieIcons.Check, null, tint = c.onRinging, size = 24.dp)
+        }
         Spacer(Modifier.height(Space.s3))
     }
 }
@@ -456,6 +483,7 @@ private val SleeperProfile.summaryRes: Int
         SleeperProfile.Light -> R.string.profile_light_value
         SleeperProfile.Medium -> R.string.profile_medium_value
         SleeperProfile.Deep -> R.string.profile_deep_value
+        SleeperProfile.Crazy -> R.string.profile_crazy_value
     }
 
 @Composable

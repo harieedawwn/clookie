@@ -45,6 +45,7 @@ val SleeperProfile.nameRes: Int
         SleeperProfile.Light -> R.string.profile_light
         SleeperProfile.Medium -> R.string.profile_medium
         SleeperProfile.Deep -> R.string.profile_deep
+        SleeperProfile.Crazy -> R.string.profile_crazy
     }
 
 @get:StringRes
@@ -54,6 +55,7 @@ val VibrationPattern.nameRes: Int
         VibrationPattern.Heartbeat -> R.string.vibration_heartbeat
         VibrationPattern.Steady -> R.string.vibration_steady
         VibrationPattern.Crescendo -> R.string.vibration_crescendo
+        VibrationPattern.Max -> R.string.vibration_max
     }
 
 val PermItem.icon: ImageVector

@@ -8,6 +8,7 @@ import android.content.pm.ServiceInfo
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.audiofx.LoudnessEnhancer
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
@@ -30,6 +31,7 @@ import io.github.harieedawwn.clookie.model.RingEvent
 import io.github.harieedawwn.clookie.model.RingOutcome
 import io.github.harieedawwn.clookie.model.RingRules
 import io.github.harieedawwn.clookie.model.RingState
+import io.github.harieedawwn.clookie.model.SleeperProfile
 import io.github.harieedawwn.clookie.model.on
 import io.github.harieedawwn.clookie.model.waveform
 import kotlinx.coroutines.CoroutineScope
@@ -85,6 +87,7 @@ class RingingService : Service() {
     private lateinit var repo: AlarmRepository
     private lateinit var store: RingStateStore
     private var player: MediaPlayer? = null
+    private var boost: LoudnessEnhancer? = null
     private var vibrator: Vibrator? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var focus: AudioFocusRequest? = null
@@ -209,6 +212,11 @@ class RingingService : Service() {
             }
             start()
         }
+        // Báo động đỏ: louder than the alarm stream's maximum (+15 dB make-up gain on the player).
+        val crazy = alarm.profile == SleeperProfile.Crazy
+        if (crazy) player?.let { p ->
+            boost = runCatching { LoudnessEnhancer(p.audioSessionId).apply { setTargetGain(CrazyBoostMb); enabled = true } }.getOrNull()
+        }
         startVibration(alarm)
 
         val started = SystemClock.elapsedRealtime()
@@ -217,7 +225,7 @@ class RingingService : Service() {
                 val p = if (alarm.rampSeconds <= 0) 1f
                 else ((SystemClock.elapsedRealtime() - started) / (alarm.rampSeconds * 1000f)).coerceIn(0f, 1f)
                 // Perceptual ramp from quiet to full; ducked to 30% while a mission is in use.
-                val v = (0.08f + 0.92f * p * p) * (if (RingEngine.ducked()) 0.3f else 1f)
+                val v = (0.08f + 0.92f * p * p) * (if (RingEngine.ducked()) (if (crazy) 0.7f else 0.3f) else 1f)
                 runCatching { player?.setVolume(v, v) }
                 // Volume lock: whatever lowers the alarm stream (keys, panel, another app) is undone.
                 if (alarm.volumeLock) runCatching {
@@ -296,6 +304,8 @@ class RingingService : Service() {
         tickJob = null
         returnJob = null
         runCatching { NotificationManagerCompat.from(this).cancel(Notifications.ID_RETURN) }
+        boost?.runCatching { release() }
+        boost = null
         player?.runCatching { stop(); release() }
         player = null
         vibrator?.cancel()
@@ -348,6 +358,7 @@ class RingingService : Service() {
         const val ACTION_RECHECK = "recheck"
         private const val ReturnCheckMs = 2_000L
         private const val ReturnPingMs = 10_000L
+        private const val CrazyBoostMb = 1500
 
         fun fire(context: Context, alarmId: Long, triggerAt: Long) = start(
             context,

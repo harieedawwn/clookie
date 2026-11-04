@@ -10,6 +10,8 @@ val VibrationPattern.waveform: Waveform?
         VibrationPattern.Heartbeat -> Waveform(longArrayOf(0, 120, 90, 160, 700), intArrayOf(0, 255, 0, 200, 0))
         VibrationPattern.Steady -> Waveform(longArrayOf(0, 600, 400), intArrayOf(0, 255, 0))
         // three pulses that grow, then a long one
+        // Full strength nearly without pause (Báo động đỏ).
+        VibrationPattern.Max -> Waveform(longArrayOf(0, 1400, 120), intArrayOf(0, 255, 0))
         VibrationPattern.Crescendo -> Waveform(
             longArrayOf(0, 150, 150, 200, 150, 280, 150, 800, 500),
             intArrayOf(0, 90, 0, 150, 0, 210, 0, 255, 0),

@@ -24,29 +24,41 @@ fun guideSteps(pattern: Int): List<List<Int>> =
     listOf(CookiePattern.frameOrder()) + CookiePattern.patternOrder(pattern).map { listOf(it) }
 
 /**
- * A Cookie Code on a sheet of the owner's notebook paper: printed 8 mm squares (solid) split
- * 4x4 (dotted), one empty square around the marker, ballpoint ink. Steps before [step] are
+ * A Cookie Code on a sheet of the owner's notebook paper: 2 mm squares (dotted) grouped 4x4 by
+ * printed 8 mm lines (solid); one code cell is [cellSquares] x [cellSquares] small squares
+ * (outlined, so 3 and 5 can be counted where they cross the printed lines), one empty cell
+ * around the marker, ballpoint ink. Steps before [step] are
  * drawn; step [step] is being hatched by the pen up to [progress] (read in the draw phase);
  * later cells show as faint targets; the cell being drawn (or the next one) is outlined in red pen.
  * Colors are the Giấy ô li paper in every preset, because it shows the real page.
  */
 @Composable
-fun CookieGuide(pattern: Int, step: Int, progress: () -> Float, modifier: Modifier = Modifier) {
+fun CookieGuide(pattern: Int, step: Int, progress: () -> Float, modifier: Modifier = Modifier, cellSquares: Int = 4) {
     val paper = Presets.GiayOLi.colors
     val steps = guideSteps(pattern)
     Canvas(modifier.aspectRatio(1f)) {
         val n = CookiePattern.Size + 2
         val cell = size.minDimension / n
+        val square = cell / cellSquares
         drawRect(paper.surface)
         val hair = 1.dp.toPx()
         val dots = PathEffect.dashPathEffect(floatArrayOf(hair, 2.5.dp.toPx()))
-        for (k in 0..n * 4) {
-            val p = k * cell / 4
+        for (k in 0..n * cellSquares) {
+            val p = k * square
+            // Printed bold lines every 4 small squares, as on the real page.
             val major = k % 4 == 0
             val color = if (major) paper.gridMajor else paper.grid
             val effect = if (major) null else dots
             drawLine(color, Offset(p, 0f), Offset(p, size.height), if (major) hair * 1.5f else hair, pathEffect = effect)
             drawLine(color, Offset(0f, p), Offset(size.width, p), if (major) hair * 1.5f else hair, pathEffect = effect)
+        }
+        if (cellSquares != 4) {
+            // Code cells do not sit on the printed lines: outline them so they can be counted.
+            for (k in 1..CookiePattern.Size + 1) {
+                val p = k * cell
+                drawLine(paper.inkMuted, Offset(p, cell), Offset(p, size.height - cell), hair)
+                drawLine(paper.inkMuted, Offset(cell, p), Offset(size.width - cell, p), hair)
+            }
         }
         fun rect(index: Int): Rect {
             val r = index / CookiePattern.Size + 1

@@ -158,6 +158,35 @@ class CookieDetectorTest {
         assertTrue("detected within 3 frames: $sceneHits/${pos.size}", sceneHits >= 0.95 * pos.size)
     }
 
+    /**
+     * Owner's phone, light blue felt pen (screenshot of the scan window, 2x zoom). In luminance
+     * alone the ink is nearly paper-bright and nothing is found; with [InkPlane] it reads.
+     */
+    @Test
+    fun realPhotoOfLightBlueMarkerIsReadWithBlueInkPlane() {
+        val img = javax.imageio.ImageIO.read(javaClass.getResource("/photos/light_blue_marker.png"))
+        val x0 = 50
+        val y0 = 226
+        val side = 620
+        val size = 400
+        val y = ByteArray(FrameW * FrameH)
+        val u = ByteArray((FrameW / 2) * (FrameH / 2))
+        val ox = (FrameW - size) / 2
+        val oy = (FrameH - size) / 2
+        for (r in 0 until FrameH) for (c in 0 until FrameW) {
+            val rgb = img.getRGB(x0 + (c - ox).coerceIn(0, size - 1) * side / size, y0 + (r - oy).coerceIn(0, size - 1) * side / size)
+            val red = rgb shr 16 and 255
+            val g = rgb shr 8 and 255
+            val b = rgb and 255
+            y[r * FrameW + c] = (0.299 * red + 0.587 * g + 0.114 * b).toInt().toByte()
+            if (r % 2 == 0 && c % 2 == 0) u[(r / 2) * (FrameW / 2) + c / 2] = (128 - 0.169 * red - 0.331 * g + 0.5 * b).toInt().coerceIn(0, 255).toByte()
+        }
+        val target = (1 shl 0) or (1 shl 2) or (1 shl 8)
+        val d = CookieDetector()
+        InkPlane.darkenBlue(y, FrameW, FrameW, FrameH, u, FrameW / 2, 1)
+        assertTrue("found ${d.detect(y, FrameW, FrameH)}", (0 until d.count).any { CookiePattern.matches(d.patterns[it], target) })
+    }
+
     @Test
     fun realPhotoOfBlankPaperIsNegative() {
         val p = SyntheticCamera.photo

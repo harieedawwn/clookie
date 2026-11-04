@@ -18,6 +18,7 @@ import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
+import io.github.harieedawwn.clookie.model.InkPlane
 import androidx.camera.viewfinder.core.ImplementationMode
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -91,7 +92,7 @@ fun CameraFeed(
         analysis.setAnalyzer(executor) { image ->
             lastFrame.set(SystemClock.elapsedRealtime())
             try {
-                copier.copy(image)
+                copier.copy(image, sink.blueInk)
                 sink.onFrame(copier.bytes, image.width, image.height, copier.rowStride)
             } finally {
                 image.close()
@@ -156,7 +157,10 @@ private class YPlane {
     var rowStride = 0
         private set
 
-    fun copy(image: ImageProxy) {
+    private var u = ByteArray(0)
+
+    /** [blueInk]: also fold the Cb plane in, so blue ink reads as dark ([InkPlane]). */
+    fun copy(image: ImageProxy, blueInk: Boolean) {
         val plane = image.planes[0]
         val buffer = plane.buffer
         buffer.rewind()
@@ -164,5 +168,15 @@ private class YPlane {
         if (bytes.size < n) bytes = ByteArray(n)
         buffer.get(bytes, 0, n)
         rowStride = plane.rowStride
+        if (!blueInk || image.planes.size < 2) return
+        val cb = image.planes[1]
+        val ub = cb.buffer
+        ub.rewind()
+        val m = ub.remaining()
+        if (u.size < m) u = ByteArray(m)
+        ub.get(u, 0, m)
+        // The last chroma row can be shorter than rowStride: stay inside what was copied.
+        val rows = minOf(image.height, ((m - 1) / cb.rowStride + 1) * 2)
+        InkPlane.darkenBlue(bytes, rowStride, image.width, rows, u, cb.rowStride, cb.pixelStride)
     }
 }

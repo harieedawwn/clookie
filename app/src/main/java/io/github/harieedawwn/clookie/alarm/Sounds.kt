@@ -13,7 +13,7 @@ import io.github.harieedawwn.clookie.model.Alarm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** Clookie's six synthesized sounds (scripts/sounds.py -> res/raw). */
+/** Clookie's seven synthesized sounds (scripts/sounds.py -> res/raw). */
 enum class BuiltInSound(val key: String, @RawRes val raw: Int, @StringRes val nameRes: Int) {
     Crunch("crunch", R.raw.clookie_crunch, R.string.sound_crunch),
     Dawn("dawn", R.raw.clookie_dawn, R.string.sound_dawn),
@@ -21,6 +21,7 @@ enum class BuiltInSound(val key: String, @RawRes val raw: Int, @StringRes val na
     Knock("knock", R.raw.clookie_knock, R.string.sound_knock),
     Chirp("chirp", R.raw.clookie_chirp, R.string.sound_chirp),
     Beeper("beeper", R.raw.clookie_beeper, R.string.sound_beeper),
+    Siren("siren", R.raw.clookie_siren, R.string.sound_siren),
 }
 
 /** Where an alarm sound comes from. Stored as "clookie:<key>", "system:<uri>" or "file:<uri>". */

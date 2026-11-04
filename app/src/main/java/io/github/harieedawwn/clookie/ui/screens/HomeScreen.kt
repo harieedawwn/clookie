@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -90,9 +91,10 @@ fun HomeScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ClookieLockup()
                 Spacer(Modifier.weight(1f))
-                Box {
+                // Độ tin cậy lives in Settings; the shield shows here only while something critical is off.
+                if (reliabilityIssue) Box(Modifier.heightIn(min = 48.dp)) {
                     IconCircleButton(ClookieIcons.Shield, stringResource(R.string.reliability), onReliability)
-                    if (reliabilityIssue) {
+                    run {
                         Box(
                             Modifier.align(Alignment.TopEnd).offset(2.dp, (-2).dp).size(14.dp)
                                 .background(Clookie.colors.background, CircleShape).padding(2.dp)

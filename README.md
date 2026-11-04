@@ -12,7 +12,7 @@
 
 ## Tải về
 
-**[Tải Clookie v1.0.0 (APK)](https://github.com/harieedawwn/clookie/releases/download/v1.0.0/Clookie-v1.0.0.apk)**
+**[Tải Clookie v1.1.0 (APK)](https://github.com/harieedawwn/clookie/releases/download/v1.1.0/Clookie-v1.1.0.apk)**
 · [Mọi phiên bản](https://github.com/harieedawwn/clookie/releases)
 
 Cần Android 8.0 trở lên. Ứng dụng tự báo khi có bản mới.
@@ -23,7 +23,7 @@ Clookie không có trên CH Play, nên điện thoại sẽ hỏi trước khi c
 
 1. Mở link tải ở trên bằng Chrome trên điện thoại, bấm **Tải xuống**.
    Nếu Chrome cảnh báo "File này có thể gây hại", bấm **Vẫn tải xuống**.
-2. Mở thông báo **Đã tải xong** (hoặc ứng dụng **Tệp** → **Tải xuống**) và chạm vào `Clookie-v1.0.0.apk`.
+2. Mở thông báo **Đã tải xong** (hoặc ứng dụng **Tệp** → **Tải xuống**) và chạm vào `Clookie-v1.1.0.apk`.
 3. Nếu hiện "Không được phép cài ứng dụng không rõ nguồn gốc", bấm **Cài đặt** (Settings)
    → bật **Cho phép từ nguồn này** → bấm quay lại.
    - Xiaomi / Redmi / POCO: có thể phải tắt **Chế độ bảo vệ** hoặc bấm **Tiếp tục cài đặt**.

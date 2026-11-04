@@ -12,9 +12,10 @@ import java.time.ZonedDateTime
 
 enum class MissionType { Classic, CookieCode, Qr, Math, Shake, Steps, Typing, Memory, Crumbs }
 
-enum class SleeperProfile { Light, Medium, Deep }
+/** [Crazy]: "Báo động đỏ", for people nothing else wakes; shown apart from the three normal profiles. */
+enum class SleeperProfile { Light, Medium, Deep, Crazy }
 
-enum class VibrationPattern { Off, Heartbeat, Steady, Crescendo }
+enum class VibrationPattern { Off, Heartbeat, Steady, Crescendo, Max }
 
 /** Regular alarm, quick nap (one exact instant, deleted after it rings), timer (Stage 5). */
 enum class AlarmKind { Alarm, Nap, Timer }

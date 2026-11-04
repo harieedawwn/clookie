@@ -210,3 +210,12 @@ targetSdk stays 36 until Stage 2 reviews Android 17 behavior changes for alarms 
   check tolerates wobbly edges; new codes use as few cells as possible (3). Synthetic set (all pattern sizes): 97 %
   detected within 3 frames, 0 false matches. Loose 55 %-coverage hatching measured 93.5 % (not a test target).
 - Restore runs in one Room transaction; ringing screen recomposes once a minute; labels wrap instead of "…".
+
+### v1.1.0 (2026-11-04)
+- Cookie Code: blue ink counts as dark (luminance minus 1.5 x Cb excess, `InkPlane`; a real light-blue felt-pen photo
+  is a test fixture). Cell size 3x3 / 4x4 / 5x5 notebook squares (DataStore `cookie_cell`, guide only; detection is
+  scale-free).
+- Báo động đỏ (`SleeperProfile.Crazy`), apart from the three profiles: siren sound (`clookie_siren`, saturated, about
+  -4.5 dBFS RMS), +15 dB LoudnessEnhancer, max vibration, no snooze, code + 5 level-3 problems + slide, awake check 2 min.
+- Slide to stop follows the finger synchronously; stops past 60 % or on a flick past 25 %.
+- Giòn tan re-synthesized (wooden bars, pentatonic hook, quiet crumble). Home shield only while something critical is off.

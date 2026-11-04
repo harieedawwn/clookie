@@ -170,6 +170,8 @@
     <string name="code_none">No codes yet</string>
     <string name="code_space_full">No new patterns left</string>
     <string name="guide_step">%1$d/%2$d</string>
+    <string name="code_cell_size">Cell</string>
+    <string name="code_cell_n">%1$d×%1$d</string>
     <string name="cd_play">Play</string>
     <string name="cd_pause">Pause</string>
     <string name="cd_step_back">Previous step</string>
@@ -323,4 +325,9 @@
     <string name="backup_done">Saved %1$d alarms</string>
     <string name="restore_done">Restored %1$d alarms</string>
     <string name="backup_failed">Invalid file</string>
+    <string name="profile_crazy">Red alert</string>
+    <string name="profile_crazy_value">Max siren · no snooze · code + 5 hard problems</string>
+    <string name="vibration_max">Max</string>
+    <string name="sound_siren">Siren</string>
+    <string name="profile_extreme">Sleep like a log</string>
 </resources>

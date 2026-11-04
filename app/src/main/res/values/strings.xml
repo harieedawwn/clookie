@@ -173,6 +173,8 @@
     <string name="code_none">Chưa có mã</string>
     <string name="code_space_full">Hết mẫu mới</string>
     <string name="guide_step">%1$d/%2$d</string>
+    <string name="code_cell_size">Cỡ ô</string>
+    <string name="code_cell_n">%1$d×%1$d</string>
     <string name="cd_play">Phát</string>
     <string name="cd_pause">Tạm dừng</string>
     <string name="cd_step_back">Bước trước</string>
@@ -333,4 +335,9 @@
     <string name="backup_failed">Tệp không hợp lệ</string>
     <string name="font_display" translatable="false">Fraunces</string>
     <string name="font_ui" translatable="false">Be Vietnam</string>
+    <string name="profile_crazy">Báo động đỏ</string>
+    <string name="profile_crazy_value">Còi hú tối đa · không báo lại · mã + 5 bài khó</string>
+    <string name="vibration_max">Tối đa</string>
+    <string name="sound_siren">Còi hú</string>
+    <string name="profile_extreme">Ngủ như chết</string>
 </resources>

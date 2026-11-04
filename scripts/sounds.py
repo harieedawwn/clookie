@@ -1,4 +1,4 @@
-"""Synthesize Clookie's six original alarm sounds into app/src/main/res/raw.
+"""Synthesize Clookie's seven original alarm sounds into app/src/main/res/raw.
 
 Usage: python -E -P scripts/sounds.py
 
@@ -84,6 +84,35 @@ def crunch(dur=0.12):
     return bandpass_noise(n, 1800, 7000) * env(n, 0.001, 0.025) * 2.2
 
 
+def mallet(freq, dur=1.4, bright=1.0):
+    """Wooden bar struck by a soft mallet: tuned-bar partials (1 : 3.93 : 10.7), each decaying
+    faster than the last, a body resonance an octave down, and a short felt thump."""
+    t = t_axis(dur)
+    out = np.sin(2 * np.pi * freq * t) * np.exp(-t / 0.55)
+    out += 0.28 * bright * np.sin(2 * np.pi * freq * 3.93 * t) * np.exp(-t / 0.09)
+    out += 0.07 * bright * np.sin(2 * np.pi * freq * 10.7 * t) * np.exp(-t / 0.025)
+    out += 0.22 * np.sin(2 * np.pi * freq * 0.5 * t) * np.exp(-t / 0.35)
+    thump = lowpass(RNG.standard_normal(len(t)), 900) * env(len(t), 0.0005, 0.008) * 0.6
+    return (out + thump) * np.clip(t / 0.003, 0, 1)
+
+
+def crumble(dur=0.22, grains=7):
+    """A cookie bite: a few tiny dry cracks close together, soft and mid-high, not hiss."""
+    n = int(dur * SR)
+    out = np.zeros(n)
+    times = np.sort(RNG.uniform(0, dur * 0.6, grains))
+    for k, at in enumerate(times):
+        g = int(0.012 * SR)
+        crack = bandpass_noise(g, 1200, 4200) * env(g, 0.0003, 0.0025 + 0.001 * (k % 3))
+        place(out, crack * RNG.uniform(0.5, 1.0), at)
+    return out
+
+
+def soft_limit(x, drive):
+    """Loudness by saturation: tanh pushes the waveform toward a square (more RMS, same peak)."""
+    return np.tanh(drive * x / np.max(np.abs(x)))
+
+
 def soft_pad(freq, dur=2.4):
     t = t_axis(dur)
     a = np.clip(t / 0.25, 0, 1) * np.exp(-t / 0.9)
@@ -126,16 +155,26 @@ def beep(freq, dur=0.11):
 # --- the six sounds -----------------------------------------------------------
 
 def make_crunch():
-    """Giòn tan: bright marimba hook with crunchy bites on the off-beats."""
-    beat = 0.25
-    melody = [3, 10, 7, 15, 10, 7, 3, 5]
+    """Giòn tan: a bouncy C-major pentatonic hook on warm wooden bars over a soft bass, with a
+    quiet cookie-bite crumble on two off-beats. Melody leads; the crumble is texture (-18 dB)."""
+    eighth = 60 / 112 / 2
+    # semitones from A4: C5=3 D5=5 E5=7 G5=10 A5=12 C6=15; bars: C, Am, F, G
+    hook = [3, 7, 10, 7, 12, 10, 7, 5,
+            3, 7, 10, 15, 12, 10, None, None,
+            5, 7, 10, 12, 10, 7, 5, 3,
+            7, 5, 3, 5, 3, None, None, None]
+    bass = [-21, -24, -28, -26]  # C3 A2 F2 G2
     ev = []
-    for i, n in enumerate(melody):
-        ev.append((i * beat * 2, marimba(note(n))))
-        ev.append((i * beat * 2 + beat, crunch()))
-    ev.append((4.0, marimba(note(15)) * 0.8))
-    ev.append((4.25, marimba(note(19)) * 0.8))
-    return loop(5.0, ev)
+    for i, n in enumerate(hook):
+        if n is not None:
+            accent = 1.0 if i % 2 == 0 else 0.72
+            ev.append((i * eighth, mallet(note(n), bright=accent) * accent))
+    for b, n in enumerate(bass):
+        ev.append((b * 8 * eighth, mallet(note(n), dur=1.8, bright=0.4) * 0.55))
+        ev.append((b * 8 * eighth + 4 * eighth, mallet(note(n + 7), dur=1.2, bright=0.4) * 0.35))
+    for at in (14, 29):
+        ev.append((at * eighth, crumble() * 0.12))
+    return loop(32 * eighth, ev, tail=1.8)
 
 
 def make_dawn():
@@ -183,6 +222,27 @@ def make_beeper():
     return loop(2.0, ev, tail=0.2)
 
 
+def make_siren():
+    """Còi báo động (crazy sleeper): deliberately unbearable. A fast yelp siren swept 650-1700 Hz
+    four times a second, two square-ish voices a quarter-tone apart beating against each other,
+    cut by harsh 3.2 kHz bursts where the ear is most sensitive, saturated to near-square for the
+    highest loudness a full-scale file can carry. No pleasant interval anywhere."""
+    dur = 2.0
+    t = t_axis(dur)
+    sweep = (t * 4) % 1.0
+    f = 650 + 1050 * sweep ** 0.6
+    phase = 2 * np.pi * np.cumsum(f) / SR
+    yelp = np.sign(np.sin(phase)) * 0.6 + np.sign(np.sin(phase * 1.0293)) * 0.6
+    burst = np.zeros_like(t)
+    for k in range(8):
+        at = k * 0.25 + 0.17
+        mask = (t >= at) & (t < at + 0.06)
+        burst[mask] = np.sign(np.sin(2 * np.pi * 3200 * t[mask])) + 0.7 * np.sign(np.sin(2 * np.pi * 4530 * t[mask]))
+    x = yelp + 0.9 * burst
+    x = lowpass(x, 9000)  # tame aliasing, keep the bite
+    return soft_limit(x, 3.5)
+
+
 SOUNDS = {
     "clookie_crunch": make_crunch,
     "clookie_dawn": make_dawn,
@@ -190,6 +250,7 @@ SOUNDS = {
     "clookie_knock": make_knock,
     "clookie_chirp": make_chirp,
     "clookie_beeper": make_beeper,
+    "clookie_siren": make_siren,
 }
 
 
@@ -199,6 +260,8 @@ def main():
         x = make()
         x = x - np.mean(x)
         x = x / np.max(np.abs(x)) * 10 ** (-1 / 20)  # -1 dBFS peak
+        if name == "clookie_crunch":
+            x = soft_limit(x, 1.6) * 10 ** (-1 / 20)  # gentle: a few loud peaks no longer make the rest quiet
         path = OUT / f"{name}.ogg"
         sf.write(path, x.astype(np.float32), SR, format="OGG", subtype="VORBIS")
         print(f"{path.name}: {len(x) / SR:.1f} s, {path.stat().st_size / 1024:.0f} KB")
